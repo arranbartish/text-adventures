@@ -1,32 +1,24 @@
 package au.bartish.game;
 
+import au.bartish.game.enterence.OutsideEntrance;
+
 import java.util.Scanner;
 
-/**
- * Hello world!
- *
- */
-public class App 
+public class App
 {
     public static void main( String[] args ) {
         System.out.println("Welcome to the Dark of Darkness!\n");
-        System.out.println("You are in the legend. You see a beautiful village with monsters. There is a " +
-                "dark mansion in front of you.\n");
 
+        Backpack backpack = new Backpack();
+        House house = new House();
+        Location currentLocation = house.get("outsideEntrance");
         while (true) {
+            System.out.println(currentLocation.getStory());
+            System.out.println();
             final Scanner keyboard = new Scanner(System.in);
-            System.out.println("Do you go inside?");
-            final String response = keyboard.next();
-
-            if (response.equalsIgnoreCase("yes")) {
-                System.out.println("You go inside.");
-                System.exit(0);
-            } else if (response.equalsIgnoreCase("no")) {
-                System.out.println("You walk away and get eaten by a monster in the villiage.");
-                System.exit(0);
-            } else {
-                System.out.println("You stand there thinking about if you want to go in.");
-            }
+            System.out.println(currentLocation.getQuestion());
+            final String response = keyboard.nextLine();
+            currentLocation = currentLocation.doAction(response, backpack);
         }
     }
 
