@@ -5,7 +5,8 @@ import java.util.Scanner;
 public class App
 {
     public static void main( String[] args ) {
-        System.out.println("Welcome to the Dark of Darkness!\n");
+        System.out.println("Welcome to the Dark of Darkness!");
+        System.out.println();
 
         Backpack backpack = new Backpack();
         House house = new House();
