@@ -1,11 +1,11 @@
 package au.bartish.game.hallway;
 
 import au.bartish.game.Backpack;
+import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
-import au.bartish.game.Woredrobe.Wardrobe;
 
-public class Hallway implements Location {
+public class Hallway extends BaseItemContainer implements Location {
 
     private final House house;
 
@@ -30,13 +30,17 @@ public class Hallway implements Location {
     public Location doAction(String action, Backpack backpack) {
         if (action.equalsIgnoreCase("north")) {
             return house.get("wardrobe");
-        } else if (action.equalsIgnoreCase("north")) {
-
-        } else if (action.equalsIgnoreCase("north")) {
-
+        } else if (action.equalsIgnoreCase("west")) {
+            return house.get("kitchen");
+        } else if (action.equalsIgnoreCase("east")) {
+            return house.get("livingRoom");
         }
 
         System.out.println("You stand there thinking about which direction to go.");
         return this;
+    }
+
+    public String getDisplayName() {
+        return "hallway";
     }
 }

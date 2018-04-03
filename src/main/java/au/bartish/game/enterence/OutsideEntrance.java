@@ -1,10 +1,11 @@
 package au.bartish.game.enterence;
 
 import au.bartish.game.Backpack;
+import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 
-public class OutsideEntrance implements Location {
+public class OutsideEntrance extends BaseItemContainer implements Location {
 
     private final House house;
 
@@ -33,5 +34,9 @@ public class OutsideEntrance implements Location {
             return this;
         }
         return null;
+    }
+
+    public String getDisplayName() {
+        return "front yard of the mansion";
     }
 }

@@ -1,13 +1,13 @@
-package au.bartish.game.exit;
+package au.bartish.game.kitchen;
 
 import au.bartish.game.Backpack;
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.Location;
 
-public class Exit extends BaseItemContainer implements Location{
+public class Kitchen extends BaseItemContainer implements Location {
 
     public String getStory() {
-        return "";
+        return null;
     }
 
     public String getQuestion() {
@@ -15,7 +15,6 @@ public class Exit extends BaseItemContainer implements Location{
     }
 
     public Location doAction(String action, Backpack backpack) {
-
         return null;
     }
 
