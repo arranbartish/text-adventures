@@ -1,19 +1,26 @@
 package au.bartish.game.utilities;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.chomp;
 
 public class StringBuilderListBuilder implements ListBuilder {
 
     public String listItems(Collection<String> items){
-        StringBuffer stringBuffer = new StringBuffer("");
+        final StringBuffer stringBuffer = new StringBuffer("\n");
         if(items.isEmpty()) {
             return null;
         } else {
             for (String item : items) {
-                stringBuffer.append("\n- " +  item);
+                stringBuffer
+                        .append("- ")
+                        .append(item)
+                        .append('\n');
             }
         }
-        return stringBuffer.toString();
+        return chomp(stringBuffer.toString());
     }
 
 }

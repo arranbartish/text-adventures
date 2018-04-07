@@ -23,8 +23,10 @@ public class BaseItemContainer implements ItemContainer {
     }
 
     public void view() {
-        for (String item : items) {
-            System.out.println(item);
+        if(isEmpty()){
+            System.out.println("nothing");
+        } else {
+            System.out.println(listItems());
         }
     }
 
