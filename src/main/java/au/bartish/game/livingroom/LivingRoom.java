@@ -9,8 +9,6 @@ import au.bartish.game.utilities.StringBuilderListBuilder;
 
 public class LivingRoom extends BaseItemContainer implements Location {
 
-    private ListBuilder listBuilder = new StringBuilderListBuilder();
-
     private final House house;
 
     public LivingRoom(House house) {
