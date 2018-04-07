@@ -4,6 +4,6 @@ public interface Location extends ItemContainer{
 
     public String getStory();
     public String getQuestion();
-    public Location doAction(String action, Backpack backpack);
+    public Location doAction(String action);
     public String getDisplayName();
 }

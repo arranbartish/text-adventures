@@ -1,6 +1,5 @@
 package au.bartish.game.Woredrobe;
 
-import au.bartish.game.Backpack;
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
@@ -27,7 +26,7 @@ public class Wardrobe extends BaseItemContainer implements Location {
         return "What do you want to do?";
     }
 
-    public Location doAction(String action, Backpack backpack) {
+    public Location doAction(String action) {
         if (action.equalsIgnoreCase("exit")) {
             System.out.println("You leave the wardrobe");
             return house.get("hallway");

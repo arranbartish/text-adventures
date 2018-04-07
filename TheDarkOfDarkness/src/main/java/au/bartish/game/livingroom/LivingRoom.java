@@ -1,6 +1,5 @@
 package au.bartish.game.livingroom;
 
-import au.bartish.game.Backpack;
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
@@ -29,7 +28,7 @@ public class LivingRoom extends BaseItemContainer implements Location {
         return "What would you like to do?";
     }
 
-    public Location doAction(String action, Backpack backpack) {
+    public Location doAction(String action) {
         if (action.equalsIgnoreCase("west")) {
             return house.get("hallway");
         }

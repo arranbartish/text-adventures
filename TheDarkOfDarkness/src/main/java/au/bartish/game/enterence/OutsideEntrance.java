@@ -1,6 +1,5 @@
 package au.bartish.game.enterence;
 
-import au.bartish.game.Backpack;
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
@@ -22,7 +21,7 @@ public class OutsideEntrance extends BaseItemContainer implements Location {
         return "Do you go inside?";
     }
 
-    public Location doAction(String action, Backpack backpack) {
+    public Location doAction(String action) {
         if (action.equalsIgnoreCase("yes")) {
             System.out.println("You go inside.");
             return house.get("hallway");

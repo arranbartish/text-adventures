@@ -18,7 +18,7 @@ public class App
             System.out.println(currentLocation.getQuestion());
             final String response = keyboard.nextLine();
             globalActionHandler(response, currentLocation, backpack);
-            currentLocation = currentLocation.doAction(response, backpack);
+            currentLocation = currentLocation.doAction(response);
         }
     }
 
