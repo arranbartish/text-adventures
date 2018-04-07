@@ -1,7 +1,5 @@
 package au.bartish.game.utilities;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.chomp;

@@ -31,7 +31,7 @@ public class BaseItemContainer implements ItemContainer {
     }
 
     public boolean isEmpty() {
-        return itemsCount() < 1;
+        return items.isEmpty();
     }
 
     public String listItems() {
