@@ -3,7 +3,9 @@ package au.bartish.game;
 import java.util.Collection;
 
 public enum Action implements Listable, Searchable {
+    DEFAULT(""),
     LAND("land", "land"),
+    ENTER_THE_POND("enter the pond", "enter the pond", "enter", "pond"),
     FLY_AWAY("fly away", "fly", "away", "fly away"),
     KEEP_FLYING("keep flying", "keep flying", "flying");
 

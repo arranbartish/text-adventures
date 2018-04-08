@@ -1,5 +1,6 @@
 package au.bartish.game;
 
+import au.bartish.game.exit.Exit;
 import au.bartish.game.pond.ForbiddenPond;
 import au.bartish.game.sky.Sky;
 
@@ -13,7 +14,7 @@ public class World {
     public World() {
         locations.put("sky", new Sky(this));
         locations.put("forbiddenPond", new ForbiddenPond(this));
-
+        locations.put( "exit", new Exit());
     }
 
     public Location get(String location) {
