@@ -28,6 +28,6 @@ public class ActionTest {
 
     @Test
     public void will_get_display_name() {
-        assertThat(FLY_AWAY.getDisplayName(), is("fly away"));
+        assertThat(FLY_AWAY.getDisplayName(), is("Fly away"));
     }
 }

@@ -1,10 +1,14 @@
 package au.bartish.game.livingroom;
 
+import au.bartish.game.Artifact;
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 import au.bartish.game.utilities.ListBuilder;
 import au.bartish.game.utilities.StringBuilderListBuilder;
+
+import static au.bartish.game.Artifact.BEACH_BALL;
+import static au.bartish.game.Artifact.RUBBER_DUCK;
 
 public class LivingRoom extends BaseItemContainer implements Location {
 
@@ -12,8 +16,8 @@ public class LivingRoom extends BaseItemContainer implements Location {
 
     public LivingRoom(House house) {
         this.house = house;
-        this.put("rubber duck");
-        this.put("beach ball");
+        this.put(RUBBER_DUCK.get());
+        this.put(BEACH_BALL.get());
     }
 
     public String getStory() {

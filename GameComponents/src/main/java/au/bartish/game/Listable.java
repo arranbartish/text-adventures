@@ -4,4 +4,5 @@ public interface Listable {
 
     String getDisplayName();
 
+    Listable listable();
 }

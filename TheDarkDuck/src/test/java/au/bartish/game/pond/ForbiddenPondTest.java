@@ -2,14 +2,12 @@ package au.bartish.game.pond;
 
 import au.bartish.game.Location;
 import au.bartish.game.World;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.isEmptyString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class ForbiddenPondTest {
 

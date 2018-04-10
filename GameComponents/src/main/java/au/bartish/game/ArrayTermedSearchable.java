@@ -1,7 +1,5 @@
 package au.bartish.game;
 
-import com.google.common.collect.Lists;
-
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -11,12 +9,12 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 
-public class ArrayTermedSearchable implements Searchable {
+public class ArrayTermedSearchable<T extends Searchable> implements Searchable<T> {
 
     private final String[] terms;
-    private final Searchable searchableSource;
+    private final Searchable<T> searchableSource;
 
-    public ArrayTermedSearchable(String[] terms, Searchable searchableSource) {
+    public ArrayTermedSearchable(String[] terms, Searchable<T> searchableSource) {
         this.terms = terms;
         this.searchableSource = searchableSource;
     }
@@ -25,11 +23,11 @@ public class ArrayTermedSearchable implements Searchable {
         return contains(terms, term);
     }
 
-    public <T extends Searchable> T[] all() {
+    public T[] all() {
         return searchableSource.all();
     }
 
-    public <T extends Searchable> Collection<T> find(String term) {
+    public Collection<T> find(String term) {
         T[] entireSet = all();
         if (isEmpty(entireSet)) {
             return newArrayList();

@@ -49,7 +49,7 @@ public class ArrayTermedSearchableTest {
         assertThat(result, is(notNullValue()));
     }
 
-    private class SearchableSource implements Searchable {
+    private class SearchableSource implements Searchable<SearchableSource> {
 
         @Override
         public boolean hasTerm(String term) {
@@ -57,12 +57,12 @@ public class ArrayTermedSearchableTest {
         }
 
         @Override
-        public <T extends Searchable> T[] all() {
-            return (T[]) new SearchableSource[] {this};
+        public SearchableSource[] all() {
+            return new SearchableSource[] {this};
         }
 
         @Override
-        public <T extends Searchable> Collection<T> find(String term) {
+        public Collection<SearchableSource> find(String term) {
             return null;
         }
     }

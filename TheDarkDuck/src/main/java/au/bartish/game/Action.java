@@ -2,12 +2,13 @@ package au.bartish.game;
 
 import java.util.Collection;
 
-public enum Action implements Listable, Searchable {
+public enum Action implements Listable, Searchable<Action> {
     DEFAULT(""),
-    LAND("land", "land"),
-    ENTER_THE_POND("enter the pond", "enter the pond", "enter", "pond"),
-    FLY_AWAY("fly away", "fly", "away", "fly away"),
-    KEEP_FLYING("keep flying", "keep flying", "flying");
+    LAND("land", "Land"),
+    ASK_WHAT_IS_WRONG("Ask what's wrong", "ask what's wrong", "what's wrong", "wrong"),
+    ENTER_THE_POND("Enter the pond", "enter the pond", "enter", "pond"),
+    FLY_AWAY("Fly away", "fly", "away", "fly away"),
+    KEEP_FLYING("Keep flying", "keep flying", "flying");
 
     private final String displayName;
     private final Searchable searchable;
@@ -21,15 +22,20 @@ public enum Action implements Listable, Searchable {
         return displayName;
     }
 
+    @Override
+    public Listable listable() {
+        return this;
+    }
+
     public boolean hasTerm(String term) {
         return searchable.hasTerm(term);
     }
 
-    public <T extends Searchable> T[] all() {
-        return (T[]) Action.values();
+    public Action[] all() {
+        return Action.values();
     }
 
-    public <T extends Searchable> Collection<T> find(String term) {
+    public Collection<Action> find(String term) {
         return searchable.find(term);
     }
 }

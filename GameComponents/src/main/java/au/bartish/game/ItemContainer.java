@@ -2,9 +2,9 @@ package au.bartish.game;
 
 public interface ItemContainer {
 
-    void put(String item);
+    void put(Item item);
 
-    String remove(String item);
+    Item remove(Item item);
 
     int itemsCount();
 

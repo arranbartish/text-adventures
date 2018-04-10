@@ -4,6 +4,8 @@ import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 
+import static au.bartish.game.Artifact.*;
+
 public class Wardrobe extends BaseItemContainer implements Location {
 
 
@@ -11,9 +13,9 @@ public class Wardrobe extends BaseItemContainer implements Location {
 
     public Wardrobe(House house) {
         this.house = house;
-        this.put("invisible cloak");
-        this.put("sword");
-        this.put("medicine");
+        this.put(INVISIBLE_CLOAK.get());
+        this.put(SWORD.get());
+        this.put(MEDICINE.get());
     }
 
     public String getStory() {

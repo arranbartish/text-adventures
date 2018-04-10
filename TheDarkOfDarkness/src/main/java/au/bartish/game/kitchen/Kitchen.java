@@ -1,8 +1,11 @@
 package au.bartish.game.kitchen;
 
+import au.bartish.game.Artifact;
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
+
+import static au.bartish.game.Artifact.*;
 
 public class Kitchen extends BaseItemContainer implements Location {
 
@@ -10,10 +13,10 @@ public class Kitchen extends BaseItemContainer implements Location {
 
     public Kitchen(House house) {
         this.house = house;
-        this.put("pot");
-        this.put("rabbit food");
-        this.put("knife");
-        this.put("oven");
+        this.put(POT.get());
+        this.put(RABBIT_FOOD.get());
+        this.put(KNIFE.get());
+        this.put(OVEN.get());
     }
 
     public String getStory() {

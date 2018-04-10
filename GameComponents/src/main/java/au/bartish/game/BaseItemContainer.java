@@ -7,14 +7,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class BaseItemContainer implements ItemContainer {
-    Collection<String> items = new ArrayList<String>();
+    Collection<Listable> items = new ArrayList<>();
     private ListBuilder listBuilder = new StringBuilderListBuilder();
 
-    public void put(String item) {
+    public void put(Item item) {
         items.add(item);
     }
 
-    public String remove(String item) {
+    public Item remove(Item item) {
         return (items.remove(item))? item: null;
     }
 

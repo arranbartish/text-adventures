@@ -5,7 +5,7 @@ import java.util.Collection;
 public enum Navigation implements Searchable {
     GO("go");
 
-    private final ArrayTermedSearchable searchable;
+    private final ArrayTermedSearchable<Navigation> searchable;
 
     Navigation(String... terms) {
         searchable = new ArrayTermedSearchable(terms, this);
@@ -17,12 +17,12 @@ public enum Navigation implements Searchable {
     }
 
     @Override
-    public <T extends Searchable> T[] all() {
-        return (T[]) Navigation.values();
+    public Navigation[] all() {
+        return Navigation.values();
     }
 
     @Override
-    public <T extends Searchable> Collection<T> find(String term) {
+    public Collection<Navigation> find(String term) {
         return searchable.find(term);
     }
 }

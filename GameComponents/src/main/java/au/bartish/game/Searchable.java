@@ -2,11 +2,11 @@ package au.bartish.game;
 
 import java.util.Collection;
 
-public interface Searchable {
+public interface Searchable<SEARCHABLE> {
 
     boolean hasTerm(String term);
 
-    <T extends Searchable> T[] all();
+    SEARCHABLE[] all();
 
-    <T extends Searchable> Collection<T> find(String term);
+    Collection<SEARCHABLE> find(String term);
 }

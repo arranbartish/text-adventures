@@ -1,5 +1,8 @@
 package au.bartish.game;
 
+import org.apache.commons.collections.CollectionUtils;
+
+import java.util.Collection;
 import java.util.Scanner;
 
 public class TheDarkDuck
@@ -22,11 +25,16 @@ public class TheDarkDuck
         }
     }
 
+    public static Artifact whichItem() {
+        return Artifact.SWORD;
+    }
+
     public static void globalActionHandler(String action, Location location, ItemContainer backpack) {
         final ItemMover itemMover = new ItemMover();
         final String lowerAction = action.toLowerCase();
         if (lowerAction.startsWith("take")) {
-            final String item = lowerAction.replaceAll("take ", "");
+            Collection<Artifact> items = Artifact.DEFAULT.find(lowerAction.replaceAll("take ", ""));
+            Item item = ((Artifact) CollectionUtils.get(items, 0)).get();
             if (!itemMover.moveItem(item, location, backpack)){
                 System.out.println(item + " is not in the " + location.getDisplayName());
             }
