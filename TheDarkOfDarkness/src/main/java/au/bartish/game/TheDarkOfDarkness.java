@@ -1,13 +1,11 @@
 package au.bartish.game;
 
-import org.apache.commons.collections.CollectionUtils;
-
 import java.io.PrintStream;
-import java.util.Collection;
 import java.util.Scanner;
 
-public class TheDarkOfDarkness
-{
+import static au.bartish.game.Artifact.DEFAULT;
+
+public class TheDarkOfDarkness extends GameTick<Artifact> implements Game {
 
     private final Scanner scanner;
     private final PrintStream out;
@@ -16,6 +14,7 @@ public class TheDarkOfDarkness
     private Location currentLocation = house.get("outsideEntrance");
 
     public TheDarkOfDarkness(Scanner scanner, PrintStream out) {
+        super(DEFAULT, scanner, out);
         this.scanner = scanner;
         this.out = out;
     }
@@ -24,42 +23,33 @@ public class TheDarkOfDarkness
         out.println("Welcome to the Dark of Darkness!\n");
     }
 
-    public void tick() {
-        out.println(currentLocation.getStory());
-        out.println(currentLocation.getQuestion());
-        final String response = scanner.nextLine();
-        globalActionHandler(response, currentLocation, backpack);
-        currentLocation = currentLocation.doAction(response);
+    @Override
+    public Location getCurrentLocation() {
+        return currentLocation;
     }
 
+    @Override
+    public void updateLocation(Location newLocation) {
+        currentLocation = newLocation;
+    }
 
-    public static void main( String[] args ) {
+    @Override
+    public Inventory getInventory() {
+        return backpack;
+    }
+
+    public static void main(String[] args) {
+
+        Scanner scanner = new Scanner(System.in);
         TheDarkOfDarkness theDarkOfDarkness = new TheDarkOfDarkness(
-                new Scanner(System.in),
+                scanner,
                 System.out);
-        theDarkOfDarkness.welcome();
+        LoopingGame<Artifact> loop = new LoopingGame<>(
+                DEFAULT,
+                theDarkOfDarkness,
+                scanner,
+                System.out);
 
-        while (true) {
-            theDarkOfDarkness.tick();
-        }
+        loop.execute();
     }
-
-    public static Artifact whichItem() {
-        return Artifact.SWORD;
-    }
-
-    public static void globalActionHandler(String action, Location location, ItemContainer backpack) {
-        final ItemMover itemMover = new ItemMover();
-        final String lowerAction = action.toLowerCase();
-        if (lowerAction.startsWith("take")) {
-            Collection<Artifact> items = Artifact.DEFAULT.find(lowerAction.replaceAll("take ", ""));
-            Item item = ((Artifact) CollectionUtils.get(items, 0)).get();
-            if (!itemMover.moveItem(item, location, backpack)){
-                System.out.println(item + " is not in the " + location.getDisplayName());
-            }
-        } else if (action.equalsIgnoreCase("backpack")) {
-            System.out.println("your backpack " + ((backpack.isEmpty())? "has nothing in it": "contains:"+backpack.listItems()));
-        }
-    }
-
 }
