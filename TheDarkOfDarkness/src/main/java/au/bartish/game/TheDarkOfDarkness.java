@@ -2,26 +2,45 @@ package au.bartish.game;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Scanner;
 
-public class App
+public class TheDarkOfDarkness
 {
-    public static void main( String[] args ) {
-        System.out.println("Welcome to the Dark of Darkness!");
-        System.out.println();
 
-        Backpack backpack = new Backpack();
-        House house = new House();
-        Location currentLocation = house.get("outsideEntrance");
+    private final Scanner scanner;
+    private final PrintStream out;
+    private Backpack backpack = new Backpack();
+    private House house = new House();
+    private Location currentLocation = house.get("outsideEntrance");
+
+    public TheDarkOfDarkness(Scanner scanner, PrintStream out) {
+        this.scanner = scanner;
+        this.out = out;
+    }
+
+    public void welcome() {
+        out.println("Welcome to the Dark of Darkness!\n");
+    }
+
+    public void tick() {
+        out.println(currentLocation.getStory());
+        out.println(currentLocation.getQuestion());
+        final String response = scanner.nextLine();
+        globalActionHandler(response, currentLocation, backpack);
+        currentLocation = currentLocation.doAction(response);
+    }
+
+
+    public static void main( String[] args ) {
+        TheDarkOfDarkness theDarkOfDarkness = new TheDarkOfDarkness(
+                new Scanner(System.in),
+                System.out);
+        theDarkOfDarkness.welcome();
+
         while (true) {
-            System.out.println(currentLocation.getStory());
-            System.out.println();
-            final Scanner keyboard = new Scanner(System.in);
-            System.out.println(currentLocation.getQuestion());
-            final String response = keyboard.nextLine();
-            globalActionHandler(response, currentLocation, backpack);
-            currentLocation = currentLocation.doAction(response);
+            theDarkOfDarkness.tick();
         }
     }
 
