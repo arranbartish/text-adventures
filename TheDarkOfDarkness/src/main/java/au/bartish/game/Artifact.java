@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import static au.bartish.game.Item.create;
 
-public enum Artifact implements Searchable<Artifact> {
+public enum Artifact implements GameArtifact<Artifact> {
     DEFAULT(create("default"), ""),
     MEDICINE(create("Medicine"), "medicine"),
     SWORD(create("Sword"), "sword"),
@@ -38,7 +38,13 @@ public enum Artifact implements Searchable<Artifact> {
         return searchable.find(term);
     }
 
+
+
     public Item get(){
         return ObjectUtils.clone(item);
+    }
+
+    public Artifact getDefaultArtifact() {
+        return DEFAULT;
     }
 }

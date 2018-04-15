@@ -40,5 +40,4 @@ public class ArrayTermedSearchable<T extends Searchable> implements Searchable<T
                      .collect(toList());
         }
     }
-
 }
