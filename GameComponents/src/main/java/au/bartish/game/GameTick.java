@@ -1,10 +1,15 @@
 package au.bartish.game;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Scanner;
 
+import static au.bartish.game.Item.create;
+import static java.lang.String.format;
 import static org.apache.commons.collections.CollectionUtils.get;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 
@@ -32,15 +37,18 @@ public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
     private void globalActionHandler(String action, Location location, ItemContainer backpack) {
         final ItemMover itemMover = new ItemMover();
         if (action.startsWith("take")) {
-            Collection<ARTIFACT> items = defaultArtifact.find(action.replaceAll("take ", ""));
+            String queryItem = action.replaceAll("take ", "");
+            Collection<ARTIFACT> items = defaultArtifact.find(queryItem);
             @SuppressWarnings("unchecked")
-            Item item = ((ARTIFACT) get(items, 0)).get();
+            Item item = (isEmpty(items)) ? create(queryItem) : ((ARTIFACT) get(items, 0)).get();
             if (!itemMover.moveItem(item, location, getInventory())){
-                System.out.println(item + " is not in the " + location.getDisplayName());
+                out.println(format("%s is not in the %s",
+                        item.getDisplayName(),
+                        location.getDisplayName()));
             }
         } else if (contains(getInventory()
                 .listInventoryCommands(), action)) {
-            out.println(String.format("your %s %s", getInventory().getDisplayName(),
+            out.println(format("your %s %s", getInventory().getDisplayName(),
                     ((backpack.isEmpty())? "has nothing in it": "contains:"+backpack.listItems())));
         }
     }

@@ -9,7 +9,12 @@ import java.util.Collection;
 public enum SimpleArtifact implements GameArtifact<SimpleArtifact> {
 
     DEFAULT(""),
-    SOMETHING("something");
+    SOMETHING("something"),
+    WATER("water"),
+    BERRIES("berries"),
+    CRANBERRIES("cranberries");
+
+
 
     private Item item = Item.create("something");
     private final String[] terms;

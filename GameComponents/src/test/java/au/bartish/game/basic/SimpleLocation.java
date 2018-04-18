@@ -18,7 +18,9 @@ public class SimpleLocation  extends BaseItemContainer implements Location {
 
     @Override
     public Location doAction(String action) {
-        return new AnotherSimpleLocation();
+        return (action.equalsIgnoreCase("yes"))
+                ? new AnotherSimpleLocation()
+                : this;
     }
 
     @Override
