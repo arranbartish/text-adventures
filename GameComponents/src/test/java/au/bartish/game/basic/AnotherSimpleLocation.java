@@ -2,13 +2,18 @@ package au.bartish.game.basic;
 
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.Item;
+import au.bartish.game.ItemFactory;
 import au.bartish.game.Location;
 import au.bartish.game.exit.Exit;
 
+import static au.bartish.game.basic.SimpleArtifact.OVEN;
+
 public class AnotherSimpleLocation extends BaseItemContainer implements Location {
 
+    private final ItemFactory itemFactory = new SimpleItemFactory();
+
     public AnotherSimpleLocation() {
-        this.put(Item.create("Oven"));
+        this.put(OVEN.get());
     }
 
     @Override

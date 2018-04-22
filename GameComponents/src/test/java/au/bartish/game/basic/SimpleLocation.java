@@ -2,9 +2,14 @@ package au.bartish.game.basic;
 
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.Location;
-import au.bartish.game.exit.Exit;
+
+import static au.bartish.game.basic.SimpleArtifact.SOMETHING;
 
 public class SimpleLocation  extends BaseItemContainer implements Location {
+
+    public SimpleLocation() {
+        this.put(SOMETHING.get());
+    }
 
     @Override
     public String getStory() {

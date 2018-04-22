@@ -1,10 +1,10 @@
 package au.bartish.game;
 
 import au.bartish.game.basic.SimpleArtifact;
+import au.bartish.game.basic.SimpleItemFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static au.bartish.game.basic.SimpleArtifact.DEFAULT;
 import static org.hamcrest.CoreMatchers.is;
 
 public class ItemFactoryTest {
@@ -24,14 +24,6 @@ public class ItemFactoryTest {
         Item oven = itemFactory.getItem("oven");
 
         Assert.assertThat(oven.getDisplayName(), is(expectedOven.getDisplayName()));
-    }
-
-    private class SimpleItemFactory extends ItemFactory<SimpleArtifact> {
-
-        @Override
-        public SimpleArtifact getDefaultArtifact() {
-            return DEFAULT;
-        }
     }
 
 }

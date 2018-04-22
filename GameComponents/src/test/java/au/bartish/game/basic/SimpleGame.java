@@ -1,12 +1,14 @@
 package au.bartish.game.basic;
 
-import au.bartish.game.*;
+import au.bartish.game.Game;
+import au.bartish.game.GameTick;
+import au.bartish.game.Inventory;
+import au.bartish.game.Location;
 
 import java.io.PrintStream;
 import java.util.Scanner;
 
 import static au.bartish.game.basic.SimpleArtifact.DEFAULT;
-import static au.bartish.game.basic.SimpleArtifact.SOMETHING;
 
 public class SimpleGame extends GameTick<SimpleArtifact> implements Game {
 
@@ -18,7 +20,6 @@ public class SimpleGame extends GameTick<SimpleArtifact> implements Game {
                       PrintStream out) {
         super(DEFAULT, scanner, out);
         this.out = out;
-        currentLocation.put(SOMETHING.get());
     }
 
     @Override
