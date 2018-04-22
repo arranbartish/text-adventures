@@ -38,7 +38,7 @@ public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
 
         if (action.equalsIgnoreCase("look around")){
             out.println(format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
-                    ((backpack.isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems())));
+                    ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems())));
         } else if (action.startsWith("take")) {
             String queryItem = action.replaceAll("take ", "");
             moveItemFrom(location, getInventory(), queryItem, "%s is not in the %s");

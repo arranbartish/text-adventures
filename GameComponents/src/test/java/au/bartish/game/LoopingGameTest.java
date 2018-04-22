@@ -128,7 +128,6 @@ public class LoopingGameTest {
     }
 
     @Test
-    @Ignore
     public void will_look_around_an_empty_location() {
         String input = "take something\nlook around";
         GameContext context = new GameContext(input);
@@ -149,7 +148,6 @@ public class LoopingGameTest {
     }
 
     @Test
-    @Ignore("First to fix")
     public void will_look_around_a_location_with_something() {
         String input = "look around";
         GameContext context = new GameContext(input);
