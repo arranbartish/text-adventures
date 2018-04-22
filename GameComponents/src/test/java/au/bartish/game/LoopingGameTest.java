@@ -93,12 +93,8 @@ public class LoopingGameTest {
 
     @Test
     public void will_initialize_simple_location_with_something() {
-        String input = null;
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-        Location currentLocation = loop.getCurrentLocation();
-
-        assertThat(currentLocation.listItems(), containsString("- something"));
+        GameContext context = initGame(null);
+        assertThat(context.getCurrentLocation().listItems(), containsString("- something"));
     }
 
     @Test
@@ -126,11 +122,15 @@ public class LoopingGameTest {
     }
 
     private GameContext playGame(String input) {
-        GameContext context = new GameContext(input);
+        GameContext context = initGame(input);
         LoopingGame<SimpleArtifact> loop = context.getLoop();
 
         loop.execute();
         return context;
+    }
+
+    private GameContext initGame(String input) {
+        return new GameContext(input);
     }
 
     private class ExecuteXTimes implements Supplier<Boolean> {
@@ -178,6 +178,9 @@ public class LoopingGameTest {
         }
 
 
+        public Location getCurrentLocation() {
+            return getLoop().getCurrentLocation();
+        }
 
         public String getGameOutput() {
             return stream.toString();
