@@ -46,6 +46,16 @@ public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
                         item.getDisplayName(),
                         location.getDisplayName()));
             }
+        } else if(action.startsWith("drop")) {
+            String queryItem = action.replaceAll("drop ", "");
+            Collection<ARTIFACT> items = defaultArtifact.find(queryItem);
+            @SuppressWarnings("unchecked")
+            Item item = (isEmpty(items)) ? create(queryItem) : ((ARTIFACT) get(items, 0)).get();
+            if (!itemMover.moveItem(item, getInventory(), location)){
+                out.println(format("%s is not in your %s",
+                        item.getDisplayName(),
+                        getInventory().getDisplayName()));
+            }
         } else if (contains(getInventory()
                 .listInventoryCommands(), action)) {
             out.println(format("your %s %s", getInventory().getDisplayName(),

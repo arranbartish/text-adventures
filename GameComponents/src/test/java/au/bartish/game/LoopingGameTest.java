@@ -107,6 +107,28 @@ public class LoopingGameTest {
     }
 
     @Test
+    public void will_drop_something_and_inventory_will_be_empty() {
+        String input = "take something\ndrop something\ninventory";
+        GameContext context = new GameContext(input);
+        LoopingGame<SimpleArtifact> loop = context.getLoop();
+
+        loop.execute();
+        assertThat(context.getGameOutput(), containsString("your sack has nothing in it"));
+    }
+
+
+    @Test
+    public void will_not_drop_something_when_inventory_is_empty() {
+        String input = "drop something";
+        GameContext context = new GameContext(input);
+        LoopingGame<SimpleArtifact> loop = context.getLoop();
+
+        loop.execute();
+        assertThat(context.getGameOutput(), containsString("something is not in your sack"));
+    }
+
+
+    @Test
     @Ignore
     public void will_turn_berries_into_cranberries() {
         String input = "drop something\ntake berries\nput berries in water\ntake cranberries\ninventory";
