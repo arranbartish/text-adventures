@@ -4,15 +4,34 @@ import au.bartish.game.basic.SimpleArtifact;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static au.bartish.game.basic.SimpleArtifact.DEFAULT;
 import static org.hamcrest.CoreMatchers.is;
 
 public class ItemFactoryTest {
 
     @Test
-    public void will_create_item() {
-        final ItemFactory itemFactory = new ItemFactory<SimpleArtifact>();
+    public void will_create_item_from_Artifact() {
+        final ItemFactory itemFactory = new SimpleItemFactory();
         Item expectedOven = Item.create("oven");
         Item oven = itemFactory.getItem(SimpleArtifact.OVEN);
         Assert.assertThat(oven.getDisplayName(), is(expectedOven.getDisplayName()));
     }
+
+    @Test
+    public void will_create_same_item_from_text() {
+        final ItemFactory itemFactory = new SimpleItemFactory();
+        Item expectedOven = itemFactory.getItem(SimpleArtifact.OVEN);
+        Item oven = itemFactory.getItem("oven");
+
+        Assert.assertThat(oven.getDisplayName(), is(expectedOven.getDisplayName()));
+    }
+
+    private class SimpleItemFactory extends ItemFactory<SimpleArtifact> {
+
+        @Override
+        public SimpleArtifact getDefaultArtifact() {
+            return DEFAULT;
+        }
+    }
+
 }
