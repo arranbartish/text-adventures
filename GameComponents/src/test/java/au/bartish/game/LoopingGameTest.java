@@ -127,11 +127,42 @@ public class LoopingGameTest {
         assertThat(context.getGameOutput(), containsString("something is not in your sack"));
     }
 
+    @Test
+    @Ignore
+    public void will_look_around_an_empty_location() {
+        String input = "take something\nlook around";
+        GameContext context = new GameContext(input);
+        LoopingGame<SimpleArtifact> loop = context.getLoop();
+
+        loop.execute();
+        assertThat(context.getGameOutput(), containsString("your in a Simple Location and it has nothing in it"));
+    }
+
+    @Test
+    public void will_initialize_simple_location_with_something() {
+        String input = null;
+        GameContext context = new GameContext(input);
+        LoopingGame<SimpleArtifact> loop = context.getLoop();
+        Location currentLocation = loop.getCurrentLocation();
+
+        assertThat(currentLocation.listItems(), containsString("- something"));
+    }
+
+    @Test
+    @Ignore("First to fix")
+    public void will_look_around_a_location_with_something() {
+        String input = "look around";
+        GameContext context = new GameContext(input);
+        LoopingGame<SimpleArtifact> loop = context.getLoop();
+
+        loop.execute();
+        assertThat(context.getGameOutput(), containsString("your in a Simple Location and it contains:\n- something"));
+    }
 
     @Test
     @Ignore
     public void will_turn_berries_into_cranberries() {
-        String input = "drop something\ntake berries\nput berries in water\ntake cranberries\ninventory";
+        String input = "take berries\nput berries in water\ntake cranberries\ninventory";
         GameContext context = new GameContext(input);
         LoopingGame<SimpleArtifact> loop = context.getLoop();
 

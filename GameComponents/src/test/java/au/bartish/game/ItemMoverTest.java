@@ -1,12 +1,11 @@
 package au.bartish.game;
 
-import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class ItemMoverTest {
 
@@ -48,5 +47,11 @@ public class ItemMoverTest {
 
     private class TestContainer extends BaseItemContainer {
 
+
+        @Override
+        public String getDisplayName() {
+            return "Test Container";
+        }
     }
+
 }

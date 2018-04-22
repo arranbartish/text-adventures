@@ -89,5 +89,9 @@ public class BaseItemContainerTest {
 
     private class TestContainer extends BaseItemContainer {
 
+        @Override
+        public String getDisplayName() {
+            return "Test Contianer";
+        }
     }
 }

@@ -1,7 +1,5 @@
 package au.bartish.game;
 
-import org.apache.commons.collections.CollectionUtils;
-
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Scanner;
@@ -18,6 +16,8 @@ public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
     private final GameArtifact<ARTIFACT> defaultArtifact;
     private final Scanner scanner;
     private final PrintStream out;
+    private final ItemMover itemMover = new ItemMover();
+
 
     public GameTick(GameArtifact<ARTIFACT> defaultArtifact, Scanner scanner, PrintStream out) {
         this.defaultArtifact = defaultArtifact;
@@ -35,31 +35,31 @@ public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
     }
 
     private void globalActionHandler(String action, Location location, ItemContainer backpack) {
-        final ItemMover itemMover = new ItemMover();
-        if (action.startsWith("take")) {
+
+        if (action.equalsIgnoreCase("look around")){
+            out.println(format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
+                    ((backpack.isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems())));
+        } else if (action.startsWith("take")) {
             String queryItem = action.replaceAll("take ", "");
-            Collection<ARTIFACT> items = defaultArtifact.find(queryItem);
-            @SuppressWarnings("unchecked")
-            Item item = (isEmpty(items)) ? create(queryItem) : ((ARTIFACT) get(items, 0)).get();
-            if (!itemMover.moveItem(item, location, getInventory())){
-                out.println(format("%s is not in the %s",
-                        item.getDisplayName(),
-                        location.getDisplayName()));
-            }
-        } else if(action.startsWith("drop")) {
+            moveItemFrom(location, getInventory(), queryItem, "%s is not in the %s");
+        } else if (action.startsWith("drop")) {
             String queryItem = action.replaceAll("drop ", "");
-            Collection<ARTIFACT> items = defaultArtifact.find(queryItem);
-            @SuppressWarnings("unchecked")
-            Item item = (isEmpty(items)) ? create(queryItem) : ((ARTIFACT) get(items, 0)).get();
-            if (!itemMover.moveItem(item, getInventory(), location)){
-                out.println(format("%s is not in your %s",
-                        item.getDisplayName(),
-                        getInventory().getDisplayName()));
-            }
+            moveItemFrom(getInventory(), location, queryItem, "%s is not in your %s");
         } else if (contains(getInventory()
                 .listInventoryCommands(), action)) {
             out.println(format("your %s %s", getInventory().getDisplayName(),
                     ((backpack.isEmpty())? "has nothing in it": "contains:"+backpack.listItems())));
+        }
+    }
+
+    private void moveItemFrom(ItemContainer from, ItemContainer to, String queryItem, String failurePattern) {
+        Collection<ARTIFACT> items = defaultArtifact.find(queryItem);
+        @SuppressWarnings("unchecked")
+        Item item = (isEmpty(items)) ? create(queryItem) : ((ARTIFACT) get(items, 0)).get();
+        if (!itemMover.moveItem(item, from, to)){
+            out.println(format(failurePattern,
+                    item.getDisplayName(),
+                    from.getDisplayName()));
         }
     }
 }

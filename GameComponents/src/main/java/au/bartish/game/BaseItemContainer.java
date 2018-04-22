@@ -6,7 +6,7 @@ import au.bartish.game.utilities.StringBuilderListBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class BaseItemContainer implements ItemContainer {
+public abstract class BaseItemContainer implements ItemContainer {
     Collection<Listable> items = new ArrayList<>();
     private ListBuilder listBuilder = new StringBuilderListBuilder();
 

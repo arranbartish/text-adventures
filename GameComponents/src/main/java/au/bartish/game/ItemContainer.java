@@ -13,4 +13,6 @@ public interface ItemContainer {
     boolean isEmpty();
 
     String listItems();
+
+    String getDisplayName();
 }
