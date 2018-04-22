@@ -108,13 +108,11 @@ public class LoopingGameTest {
     }
 
     @Test
-    @Ignore ("Heavy items should not be takable")
+    @Ignore("Items can be fixtures")
     public void will_not_be_able_to_take_perminent_items() {
-        String input = "take oven";
-
+        GameContext context = playGame("yes\ntake oven");
+        assertThat(context.getGameOutput(), containsString("You cannot take the oven, it is too heavy"));
     }
-
-
 
     @Test
     @Ignore

@@ -38,13 +38,22 @@ public enum Artifact implements GameArtifact<Artifact> {
         return searchable.find(term);
     }
 
-
-
     public Item get(){
         return ObjectUtils.clone(item);
     }
 
     public Artifact getDefaultArtifact() {
         return DEFAULT;
+    }
+
+
+    @Override
+    public String getDisplayName() {
+        return item.getDisplayName();
+    }
+
+    @Override
+    public Listable listable() {
+        return this;
     }
 }
