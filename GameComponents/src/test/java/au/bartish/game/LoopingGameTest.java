@@ -3,8 +3,6 @@ package au.bartish.game;
 import au.bartish.game.basic.AnotherSimpleLocation;
 import au.bartish.game.basic.SimpleArtifact;
 import au.bartish.game.basic.SimpleGame;
-import au.bartish.game.exit.Exit;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -27,113 +25,69 @@ public class LoopingGameTest {
 
     @Test
     public void will_welcome() {
-        String input = "yes";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
+        GameContext context = playGame("yes");
         assertThat(context.getGameOutput(), containsString("A Welcome"));
     }
 
     @Test
     public void will_change_location_after_tick() {
-        String input = "yes";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
-        assertThat(loop.getCurrentLocation().getDisplayName(), is(new AnotherSimpleLocation().getDisplayName()));
+        GameContext context = playGame("yes");
+        assertThat(context.getLoop().getCurrentLocation().getDisplayName(), is(new AnotherSimpleLocation().getDisplayName()));
     }
 
     @Test
     public void will_take_item_to_inventory_after_tick() {
-        String input = "take something";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
-        assertThat(loop.getInventory().listItems(), containsString("something"));
+        GameContext context = playGame("take something");
+        assertThat(context.getLoop().getInventory().listItems(), containsString("something"));
     }
 
     @Test
     public void will_take_item_from_location_after_tick() {
-        String input = "take something";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
-        assertThat(loop.getCurrentLocation().itemsCount(), is(0));
+        GameContext context = playGame("take something");
+        assertThat(context.getLoop().getCurrentLocation().itemsCount(), is(0));
     }
 
     @Test
     public void will_print_the_sack_after_two_ticks() {
-        String input = "take something\nsack";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
+        GameContext context = playGame("take something\nsack");
         assertThat(context.getGameOutput(), containsString("your sack contains:\n- something"));
     }
 
     @Test
     public void will_print_the_sack_after_one_tick() {
-        String input = "sack";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
+        GameContext context = playGame("sack");
         assertThat(context.getGameOutput(), containsString("your sack has nothing in it"));
     }
 
 
     @Test
     public void will_print_the_empty_sack_with_inventory_after_one_tick() {
-        String input = "Inventory";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
+        GameContext context = playGame("Inventory");
         assertThat(context.getGameOutput(), containsString("your sack has nothing in it"));
     }
 
     @Test
     public void will_inform_me_that_gun_is_not_in_location() {
-        String input = "take gun";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
+        GameContext context = playGame("take gun");
         assertThat(context.getGameOutput(), containsString("gun is not in the Simple Location"));
     }
 
     @Test
     public void will_drop_something_and_inventory_will_be_empty() {
-        String input = "take something\ndrop something\ninventory";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
+        GameContext context = playGame("take something\ndrop something\ninventory");
         assertThat(context.getGameOutput(), containsString("your sack has nothing in it"));
     }
 
 
     @Test
     public void will_not_drop_something_when_inventory_is_empty() {
-        String input = "drop something";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
+        GameContext context = playGame("drop something");
         assertThat(context.getGameOutput(), containsString("something is not in your sack"));
     }
 
     @Test
     public void will_look_around_an_empty_location() {
-        String input = "take something\nlook around";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
+        GameContext context = playGame("take something\nlook around");
         assertThat(context.getGameOutput(), containsString("your in a Simple Location and it has nothing in it"));
     }
 
@@ -149,13 +103,18 @@ public class LoopingGameTest {
 
     @Test
     public void will_look_around_a_location_with_something() {
-        String input = "look around";
-        GameContext context = new GameContext(input);
-        LoopingGame<SimpleArtifact> loop = context.getLoop();
-
-        loop.execute();
+        GameContext context = playGame("look around");
         assertThat(context.getGameOutput(), containsString("your in a Simple Location and it contains:\n- something"));
     }
+
+    @Test
+    @Ignore ("Heavy items should not be takable")
+    public void will_not_be_able_to_take_perminent_items() {
+        String input = "take oven";
+
+    }
+
+
 
     @Test
     @Ignore
@@ -166,6 +125,14 @@ public class LoopingGameTest {
 
         loop.execute();
         assertThat(context.getGameOutput(), containsString("your sack contains:\n- cranberries"));
+    }
+
+    private GameContext playGame(String input) {
+        GameContext context = new GameContext(input);
+        LoopingGame<SimpleArtifact> loop = context.getLoop();
+
+        loop.execute();
+        return context;
     }
 
     private class ExecuteXTimes implements Supplier<Boolean> {
