@@ -52,6 +52,8 @@ public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
         }
     }
 
+
+
     private void moveItemFrom(ItemContainer from, ItemContainer to, String queryItem, String failurePattern) {
         Collection<ARTIFACT> items = defaultArtifact.find(queryItem);
         @SuppressWarnings("unchecked")

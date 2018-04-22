@@ -22,7 +22,6 @@ import static org.junit.Assert.assertThat;
 
 public class LoopingGameTest {
 
-
     @Test
     public void will_welcome() {
         GameContext context = playGame("yes");
@@ -78,6 +77,11 @@ public class LoopingGameTest {
         assertThat(context.getGameOutput(), containsString("your sack has nothing in it"));
     }
 
+    @Test
+    public void will_drop_something_in_other_room_and_item_will_there() {
+        GameContext context = playGame("take something\nyes\ndrop something\nlook around");
+        assertThat(context.getGameOutput(), containsString("your in a Another Simple Location and it contains:\n- oven\n- something"));
+    }
 
     @Test
     public void will_not_drop_something_when_inventory_is_empty() {
