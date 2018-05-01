@@ -9,14 +9,16 @@ public class TheDarkOfDarkness extends GameTick<Artifact> implements Game {
 
     private final Scanner scanner;
     private final PrintStream out;
-    private Backpack backpack = new Backpack();
-    private House house = new House();
-    private Location currentLocation = house.get("outsideEntrance");
+    private final House house;
+    private final Backpack backpack = new Backpack();
+    private Location currentLocation;
 
     public TheDarkOfDarkness(Scanner scanner, PrintStream out) {
         super(DEFAULT, scanner, out);
         this.scanner = scanner;
         this.out = out;
+        house = new House(this.out);
+        currentLocation = house.get("outsideEntrance");
     }
 
     public void welcome() {

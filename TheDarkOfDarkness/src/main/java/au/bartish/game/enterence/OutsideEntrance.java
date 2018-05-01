@@ -23,13 +23,13 @@ public class OutsideEntrance extends BaseItemContainer implements Location {
 
     public Location doAction(String action) {
         if (action.equalsIgnoreCase("yes")) {
-            System.out.println("You go inside.");
+            house.getOut().println("You go inside.");
             return house.get("hallway");
         } else if (action.equalsIgnoreCase("no")) {
-            System.out.println("You walk away and get eaten by a monster in the village.");
+            house.getOut().println("You walk away and get eaten by a monster in the village.");
             System.exit(0);
         } else {
-            System.out.println("You stand there thinking about if you want to go in.");
+            house.getOut().println("You stand there thinking about if you want to go in.");
             return this;
         }
         return null;

@@ -30,10 +30,10 @@ public class Wardrobe extends BaseItemContainer implements Location {
 
     public Location doAction(String action) {
         if (action.equalsIgnoreCase("exit")) {
-            System.out.println("You leave the wardrobe");
+            house.getOut().println("You leave the wardrobe");
             return house.get("hallway");
         }
-        System.out.println("You sit in the wardrobe thinking. It is a nice wardrobe");
+        house.getOut().println("You sit in the wardrobe thinking. It is a nice wardrobe");
         return this;
     }
 

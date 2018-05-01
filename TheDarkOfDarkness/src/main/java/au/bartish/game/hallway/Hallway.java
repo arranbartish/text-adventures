@@ -35,7 +35,7 @@ public class Hallway extends BaseItemContainer implements Location {
             return house.get("livingRoom");
         }
 
-        System.out.println("You stand there thinking about which direction to go.");
+        house.getOut().println("You stand there thinking about which direction to go.");
         return this;
     }
 

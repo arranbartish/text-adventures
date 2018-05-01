@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import static au.bartish.game.Artifact.DEFAULT;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.trim;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.junit.Assert.*;
 
@@ -25,7 +26,7 @@ public class TheDarkOfDarknessTest {
     {
         GameContext context = playGame("yes\nnorth\ntake sword\nbackpack");
         assertThat(context.getGameOutput(),
-                endsWith("your backpack contains:\n- Sword"));
+                containsString("your backpack contains:\n- Sword"));
     }
 
     @Test
@@ -33,7 +34,7 @@ public class TheDarkOfDarknessTest {
     {
         GameContext context = playGame("yes\nnorth\ntake sword\nexit\ndrop sword\nlook around");
         assertThat(context.getGameOutput(),
-                endsWith("your in a hallway and it contains:\n- Sword"));
+                containsString("your in a hallway and it contains:\n- Sword"));
     }
 
 
