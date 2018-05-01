@@ -35,9 +35,18 @@ public enum Artifact implements GameArtifact<Artifact> {
         return ObjectUtils.clone(item);
     }
 
-
     @Override
     public Artifact getDefaultArtifact() {
         return DEFAULT;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return item.getDisplayName();
+    }
+
+    @Override
+    public Listable listable() {
+        return item;
     }
 }
