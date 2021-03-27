@@ -1,5 +1,6 @@
 package au.bartish.game;
 
+import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,14 +72,14 @@ public class BaseItemContainerTest {
     @Test
     public void container_will_print_nothing_when_empty() {
         container.view();
-        assertThat(baos.toString(), is("nothing\n"));
+        Assertions.assertThat(baos.toString()).isEqualToIgnoringNewLines("nothing");
     }
 
     @Test
     public void container_will_print_items() {
         container.put(SWORD);
         container.view();
-        assertThat(baos.toString(), is("\n- Sword\n"));
+      Assertions.assertThat(baos.toString()).isEqualToIgnoringNewLines("- Sword");
     }
 
 
