@@ -1,4 +1,4 @@
-package au.bartish.game.Woredrobe;
+package au.bartish.game.ground.Woredrobe;
 
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;

@@ -1,6 +1,5 @@
-package au.bartish.game.kitchen;
+package au.bartish.game.ground.kitchen;
 
-import au.bartish.game.Artifact;
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;

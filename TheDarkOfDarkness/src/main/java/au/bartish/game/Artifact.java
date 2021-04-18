@@ -8,15 +8,18 @@ import static au.bartish.game.Item.create;
 
 public enum Artifact implements GameArtifact<Artifact> {
     DEFAULT(create("default"), ""),
-    MEDICINE(create("Medicine"), "medicine"),
-    SWORD(create("Sword"), "sword"),
-    POT(create("Pot"), "pot"),
-    RABBIT_FOOD(create("Rabbit food"), "rabbit food", "rabbit", "food"),
-    KNIFE(create("Knife"), "knife"),
-    RUBBER_DUCK(create("Rubber duck"), "rubber duck", "rubber", "duck"),
-    BEACH_BALL(create("Beach ball"), "beach ball", "beach", "ball"),
-    OVEN(create("Oven"), "oven"),
-    INVISIBLE_CLOAK(create("Invisible cloak"), "invisible cloak", "invisible", "cloak");
+    MEDICINE(create("Medicine"), "medicine", "all"),
+    SWORD(create("Sword"), "sword", "all"),
+    POT(create("Pot"), "pot", "all"),
+    RABBIT_FOOD(create("Rabbit food"), "rabbit food", "rabbit", "food", "all"),
+    KNIFE(create("Knife"), "knife", "all"),
+    RUBBER_DUCK(create("Rubber duck"), "rubber duck", "rubber", "duck", "all"),
+    BEACH_BALL(create("Beach ball"), "beach ball", "beach", "ball", "all"),
+    OVEN(create("Oven"), "oven", "all"),
+    INVISIBLE_CLOAK(create("Invisible cloak"), "invisible cloak", "invisible", "cloak", "all"),
+    SKIPPING_ROPE(create("Skipping Rope"), "rope", "all"),
+    APPLE(create("Apple"), "apple", "all")
+  ;
 
     private final Searchable<Artifact> searchable;
     private final Item item;

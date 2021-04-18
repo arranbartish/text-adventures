@@ -39,6 +39,10 @@ public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
         if (action.equalsIgnoreCase("look around")){
             out.println(format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
                     ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems())));
+        } else if (action.equalsIgnoreCase("take all")) {
+          moveAllItems(location, getInventory());
+        } else if (action.equalsIgnoreCase("drop all")) {
+          moveAllItems(getInventory(), location);
         } else if (action.startsWith("take")) {
             String queryItem = action.replaceAll("take ", "");
             moveItemFrom(location, getInventory(), queryItem, "%s is not in the %s");
@@ -52,9 +56,11 @@ public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
         }
     }
 
+  private void moveAllItems(ItemContainer from, ItemContainer to) {
+    itemMover.moveAllItems(from, to);
+  }
 
-
-    private void moveItemFrom(ItemContainer from, ItemContainer to, String queryItem, String failurePattern) {
+  private void moveItemFrom(ItemContainer from, ItemContainer to, String queryItem, String failurePattern) {
         Collection<ARTIFACT> items = defaultArtifact.find(queryItem);
         @SuppressWarnings("unchecked")
         Item item = (isEmpty(items)) ? create(queryItem) : ((ARTIFACT) get(items, 0)).get();

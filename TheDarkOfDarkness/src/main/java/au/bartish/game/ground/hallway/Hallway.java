@@ -1,4 +1,4 @@
-package au.bartish.game.hallway;
+package au.bartish.game.ground.hallway;
 
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;

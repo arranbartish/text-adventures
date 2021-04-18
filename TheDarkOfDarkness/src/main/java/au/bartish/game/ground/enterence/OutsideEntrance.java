@@ -1,4 +1,4 @@
-package au.bartish.game.enterence;
+package au.bartish.game.ground.enterence;
 
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;

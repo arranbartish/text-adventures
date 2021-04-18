@@ -5,36 +5,48 @@ import au.bartish.game.utilities.StringBuilderListBuilder;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class BaseItemContainer implements ItemContainer {
-    Collection<Listable> items = new ArrayList<>();
-    private ListBuilder listBuilder = new StringBuilderListBuilder();
+  Collection<Listable> items = new ArrayList<>();
+  private ListBuilder listBuilder = new StringBuilderListBuilder();
 
-    public void put(Item item) {
-        items.add(item);
-    }
+  public void put(Item item) {
+    items.add(item);
+  }
 
-    public Item remove(Item item) {
-        return (items.remove(item))? item: null;
-    }
+  public Item remove(Item item) {
+    return (items.remove(item)) ? item : null;
+  }
 
-    public int itemsCount() {
-        return items.size();
-    }
+  @Override
+  public Collection<Item> removeAllItems() {
+    List<Item> itemsToRemove = items.stream()
+      .filter(listable -> Item.class.isAssignableFrom(listable.getClass()))
+      .map(Item.class::cast)
+      .collect(Collectors.toList());
+    items.removeAll(itemsToRemove);
+    return itemsToRemove;
+  }
 
-    public void view() {
-        if(isEmpty()){
-            System.out.println("nothing");
-        } else {
-            System.out.println(listItems());
-        }
-    }
+  public int itemsCount() {
+    return items.size();
+  }
 
-    public boolean isEmpty() {
-        return items.isEmpty();
+  public void view() {
+    if (isEmpty()) {
+      System.out.println("nothing");
+    } else {
+      System.out.println(listItems());
     }
+  }
 
-    public String listItems() {
-        return listBuilder.listItems(items);
-    }
+  public boolean isEmpty() {
+    return items.isEmpty();
+  }
+
+  public String listItems() {
+    return listBuilder.listItems(items);
+  }
 }
