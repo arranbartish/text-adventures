@@ -9,7 +9,7 @@ import static au.bartish.game.Item.create;
 public enum Artifact implements GameArtifact<Artifact> {
     DEFAULT(create("default"), ""),
     MEDICINE(create("Medicine"), "medicine", "all"),
-    SWORD(create("Sword"), "sword", "all"),
+    WOODEN_SWORD(create("Wooden Sword"), "sword", "all"),
     POT(create("Pot"), "pot", "all"),
     RABBIT_FOOD(create("Rabbit food"), "rabbit food", "rabbit", "food", "all"),
     KNIFE(create("Knife"), "knife", "all"),

@@ -26,7 +26,8 @@ public class Yard extends BaseItemContainer implements Location {
       ((this.isEmpty()) ? "nothing in it" : this.listItems()) +
       "\n\nFrom the yard you can: " +
       "\n - Enter shed" +
-      "\n - Return to house";
+      "\n - Return to house"+
+      "\n - see the elf";
   }
 
   @Override

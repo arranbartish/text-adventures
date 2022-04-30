@@ -1,12 +1,11 @@
 package au.bartish.game;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.util.Collection;
 
 import static au.bartish.game.Artifact.DEFAULT;
-import static au.bartish.game.Artifact.SWORD;
+import static au.bartish.game.Artifact.WOODEN_SWORD;
 import static au.bartish.game.Artifact.values;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.contains;
@@ -24,12 +23,12 @@ public class ArtifactTest {
     @Test
     public void find_will_find_keep_flying() {
         Collection<Artifact> set = DEFAULT.find("sword");
-        assertThat(set, contains(SWORD));
+        assertThat(set, contains(WOODEN_SWORD));
     }
 
     @Test
     public void will_get_item_from_artifact() {
-        Item sword = SWORD.get();
+        Item sword = WOODEN_SWORD.get();
         assertThat(sword, notNullValue());
     }
 

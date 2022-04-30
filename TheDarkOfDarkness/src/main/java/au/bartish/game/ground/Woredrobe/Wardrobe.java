@@ -14,7 +14,7 @@ public class Wardrobe extends BaseItemContainer implements Location {
     public Wardrobe(House house) {
         this.house = house;
         this.put(INVISIBLE_CLOAK.get());
-        this.put(SWORD.get());
+        this.put(WOODEN_SWORD.get());
         this.put(MEDICINE.get());
     }
 
