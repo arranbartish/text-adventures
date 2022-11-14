@@ -2,3 +2,4 @@ yes
 east
 exit
 shed
+Need to be able to check for the "key" in the inventory

@@ -72,8 +72,6 @@ public class TheDarkOfDarknessTest {
   }
 
 
-
-
   private boolean isNotDisabled(String game) {
     String disabledGameName = StringUtils.replace(convertScenarioToGameName(game), ".txt", "-disabled.txt");
     String[] gameNames = findGameNames();
