@@ -41,6 +41,8 @@ public class Yard extends BaseItemContainer implements Location {
       return house.get("livingRoom");
     } else if (action.equalsIgnoreCase("elf") ) {
       return house.get("tree");
+    } else if (action.equalsIgnoreCase("shed") || action.equalsIgnoreCase("enter") ) {
+
     }
     return this;
   }
