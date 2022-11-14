@@ -3,6 +3,7 @@ package au.bartish.game;
 import au.bartish.game.basic.AnotherSimpleLocation;
 import au.bartish.game.basic.SimpleArtifact;
 import au.bartish.game.basic.SimpleGame;
+import au.bartish.game.utilities.TextProvider;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -10,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Supplier;
 
@@ -158,6 +160,7 @@ public class LoopingGameTest {
         private final Game game;
         private final LoopingGame<SimpleArtifact> loop;
 
+        private final TextProvider<String, Map<String, Object>> textProvider;
 
         public GameContext(String gameInput) {
             this(cleanInput(gameInput), countMatches(cleanInput(gameInput), '\n'));
@@ -167,7 +170,20 @@ public class LoopingGameTest {
             scanner = new Scanner(new ByteArrayInputStream(gameInput.getBytes()));
             stream = new ByteArrayOutputStream();
             printStream = new PrintStream(stream);
-            game = new SimpleGame(scanner, printStream);
+            textProvider = new TextProvider<>() {
+              @Override
+              public String resolveText(String textKey) {
+                return "hello";
+              }
+
+              @Override
+              public String resolveText(String textKey, Map<String, Object> model) {
+                return "hello";
+              }
+            };
+
+
+            game = new SimpleGame(scanner, printStream, textProvider);
             loop = new LoopingGame<>(
                     DEFAULT,
                     game,

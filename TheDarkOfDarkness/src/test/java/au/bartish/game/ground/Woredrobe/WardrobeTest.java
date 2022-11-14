@@ -4,6 +4,7 @@ import au.bartish.game.House;
 import au.bartish.game.Location;
 import org.junit.Test;
 
+import static au.bartish.game.Artifact.WOODEN_SWORD;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
@@ -14,6 +15,6 @@ public class WardrobeTest {
 
     @Test
     public void story_will_include_sword() {
-        assertThat(wardrobe.getStory(), containsString("- Sword"));
+        assertThat(wardrobe.getStory(), containsString(WOODEN_SWORD.getDisplayName()));
     }
 }

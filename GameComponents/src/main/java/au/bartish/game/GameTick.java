@@ -1,5 +1,7 @@
 package au.bartish.game;
 
+import au.bartish.game.utilities.TextProvider;
+
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Scanner;
@@ -33,6 +35,11 @@ public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
         globalActionHandler(response, getCurrentLocation(), getInventory());
         updateLocation(getCurrentLocation().doAction(response));
     }
+
+    public abstract TextProvider getTextProvider();
+
+
+
 
     private void globalActionHandler(String action, Location location, ItemContainer backpack) {
 

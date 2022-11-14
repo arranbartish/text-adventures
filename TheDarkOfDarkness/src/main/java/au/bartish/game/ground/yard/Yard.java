@@ -39,6 +39,8 @@ public class Yard extends BaseItemContainer implements Location {
   public Location doAction(String action) {
     if (action.equalsIgnoreCase("return") || action.equalsIgnoreCase("house") ) {
       return house.get("livingRoom");
+    } else if (action.equalsIgnoreCase("elf") ) {
+      return house.get("tree");
     }
     return this;
   }

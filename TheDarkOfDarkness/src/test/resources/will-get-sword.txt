@@ -1,0 +1,6 @@
+yes
+north
+take sword
+exit
+drop sword
+look around

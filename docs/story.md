@@ -17,7 +17,7 @@
 - use the enchanted sword as the key
 
 ## Get the elf to repair the wand
-- give the elf the borken wand part
+- give the elf the broken wand part
 - ask the elf to repair the wand
 
 ## get the elf to enchant the sword
@@ -83,7 +83,7 @@ done in the kitchen with the pot
 #### MEDICINE
 - Used to heal the character after battle
 - It has limited use. (3 times)
-- becomes and empty bottle
+- becomes an empty bottle
 
 ### Yard
 ![Yard](yard.png)

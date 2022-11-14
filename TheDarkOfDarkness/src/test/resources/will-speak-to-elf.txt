@@ -1,0 +1,6 @@
+yes
+east
+exit
+elf
+monsters
+backpack

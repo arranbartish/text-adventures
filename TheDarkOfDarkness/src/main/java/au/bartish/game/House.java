@@ -5,6 +5,7 @@ import au.bartish.game.ground.enterence.OutsideEntrance;
 import au.bartish.game.ground.hallway.Hallway;
 import au.bartish.game.ground.kitchen.Kitchen;
 import au.bartish.game.ground.livingroom.LivingRoom;
+import au.bartish.game.ground.yard.UnderTree;
 import au.bartish.game.ground.yard.Yard;
 
 import java.io.PrintStream;
@@ -28,6 +29,7 @@ public class House {
         locations.put("livingRoom", new LivingRoom(this));
         locations.put("kitchen", new Kitchen(this));
         locations.put("yard", new Yard(this));
+        locations.put("tree",new UnderTree(this));
     }
 
     public Location get(String location) {
