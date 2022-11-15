@@ -3,14 +3,15 @@ package au.bartish.game;
 import au.bartish.game.TheDarkOfDarknessTest.ScenarioContext.ScenarioContextBuilder;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Assumptions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
@@ -24,7 +25,7 @@ import static au.bartish.game.Artifact.DEFAULT;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 
 public class TheDarkOfDarknessTest {
@@ -49,12 +50,13 @@ public class TheDarkOfDarknessTest {
   @CsvFileSource(resources = "/scenarios/scenarios.csv")
   void playGames(String game) {
     ScenarioContext scenarioContext = buildScenarioContext(game);
-    Assumptions.assumeThat(scenarioContext.isNotDisabled()).as(scenarioContext.getDisabledReason()).isTrue();
+    assumeThat(scenarioContext.isNotDisabled()).as(scenarioContext.getDisabledReason()).isTrue();
 
-    GameContext context = playGame(scenarioContext.getScenario().commands());
+    Scenario scenario = scenarioContext.getScenario();
+    GameContext context = playGame(scenario.commands());
 
     assertThat(context.getGameOutput())
-      .contains(scenarioContext.getScenario().expectations());
+      .contains(scenario.expectations());
 
   }
 
