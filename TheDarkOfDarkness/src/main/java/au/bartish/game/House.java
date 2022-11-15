@@ -10,11 +10,12 @@ import au.bartish.game.ground.yard.Yard;
 
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class House {
 
-    private Map<String, Location> locations = new HashMap<String, Location>();
+    private Map<String, MansionLocation> locations = new HashMap<>();
     private final PrintStream out;
 
     public House() {
@@ -22,15 +23,29 @@ public class House {
     }
 
     public House(PrintStream out) {
-        this.out = out;
-        locations.put("hallway", new Hallway(this));
-        locations.put("wardrobe", new Wardrobe(this));
-        locations.put("outsideEntrance", new OutsideEntrance(this));
-        locations.put("livingRoom", new LivingRoom(this));
-        locations.put("kitchen", new Kitchen(this));
-        locations.put("yard", new Yard(this));
-        locations.put("tree",new UnderTree(this));
+      this(out, List.of(new Hallway(),
+      new Wardrobe(),
+      new OutsideEntrance(),
+      new LivingRoom(),
+      new Kitchen(),
+      new Yard(),
+      new UnderTree()));
     }
+
+  public House(PrintStream out, List<MansionLocation> locations) {
+    this.out = out;
+    locations.forEach(location -> {
+      this.locations.put(location.getKey(), location);
+      location.setHouse(this);
+    });
+    this.locations.put("hallway", new Hallway(this));
+    this.locations.put("wardrobe", new Wardrobe(this));
+    this.locations.put("outsideEntrance", new OutsideEntrance(this));
+    this.locations.put("livingRoom", new LivingRoom(this));
+    this.locations.put("kitchen", new Kitchen(this));
+    this.locations.put("yard", new Yard(this));
+    this.locations.put("tree",new UnderTree(this));
+  }
 
     public Location get(String location) {
         return locations.get(location);

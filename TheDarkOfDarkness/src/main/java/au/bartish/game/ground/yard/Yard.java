@@ -3,18 +3,22 @@ package au.bartish.game.ground.yard;
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
+import au.bartish.game.MansionLocation;
 
 import static au.bartish.game.Artifact.*;
 import static au.bartish.game.Artifact.OVEN;
 
-public class Yard extends BaseItemContainer implements Location {
+public class Yard extends MansionLocation {
 
-  private final House house;
-
-  public Yard(House house) {
-    this.house = house;
+  public Yard(){
+    super("yard");
     this.put(APPLE.get());
     this.put(SKIPPING_ROPE.get());
+  }
+
+  public Yard(House house) {
+    this();
+    setHouse(house);
   }
 
   @Override
@@ -38,9 +42,9 @@ public class Yard extends BaseItemContainer implements Location {
   @Override
   public Location doAction(String action) {
     if (action.equalsIgnoreCase("return") || action.equalsIgnoreCase("house") ) {
-      return house.get("livingRoom");
+      return getHouse().get("livingRoom");
     } else if (action.equalsIgnoreCase("elf") ) {
-      return house.get("tree");
+      return getHouse().get("tree");
     } else if (action.equalsIgnoreCase("shed") || action.equalsIgnoreCase("enter") ) {
 
     }

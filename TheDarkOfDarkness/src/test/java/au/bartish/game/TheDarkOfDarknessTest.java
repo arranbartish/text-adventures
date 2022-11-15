@@ -3,7 +3,6 @@ package au.bartish.game;
 import au.bartish.game.TheDarkOfDarknessTest.ScenarioContext.ScenarioContextBuilder;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -57,7 +56,6 @@ public class TheDarkOfDarknessTest {
 
     assertThat(context.getGameOutput())
       .contains(scenario.expectations());
-
   }
 
   private ScenarioContext buildScenarioContext(final String gameName) {

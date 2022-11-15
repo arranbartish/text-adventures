@@ -1,23 +1,23 @@
 package au.bartish.game.ground.yard;
 
-import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
+import au.bartish.game.MansionLocation;
 
-import static au.bartish.game.Artifact.APPLE;
-import static au.bartish.game.Artifact.SKIPPING_ROPE;
+public class UnderTree extends MansionLocation {
 
-public class UnderTree extends BaseItemContainer implements Location {
-
-  private final House house;
 
   private String prefix = "";
 
-  public UnderTree(House house) {
-    this.house = house;
-    this.put(APPLE.get());
-    this.put(SKIPPING_ROPE.get());
+  public UnderTree() {
+    super("underTree");
   }
+
+  public UnderTree(House house) {
+    this();
+    setHouse(house);
+  }
+
   @Override
   public String getStory() {
     return getPrefix() + "The elf continues to mutter himself about a troll." +
@@ -42,7 +42,7 @@ public class UnderTree extends BaseItemContainer implements Location {
       || action.equalsIgnoreCase("leave")
       || action.equalsIgnoreCase("bye")
     ) {
-      return house.get("yard");
+      return getHouse().get("yard");
     } else if (action.equalsIgnoreCase("monster")
       || action.equalsIgnoreCase("monsters")
         ||action.equalsIgnoreCase("village")) {
