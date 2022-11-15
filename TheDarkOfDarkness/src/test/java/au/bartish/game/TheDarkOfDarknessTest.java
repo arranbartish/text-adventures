@@ -1,5 +1,6 @@
 package au.bartish.game;
 
+import au.bartish.game.TheDarkOfDarknessTest.ScenarioContext.ScenarioContextBuilder;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.Assertions;
@@ -11,6 +12,7 @@ import org.junit.jupiter.params.provider.CsvFileSource;
 
 import java.io.*;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import static au.bartish.game.Artifact.DEFAULT;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 
 
 public class TheDarkOfDarknessTest {
@@ -45,14 +48,53 @@ public class TheDarkOfDarknessTest {
   @ParameterizedTest(name = "{index} -> {0}")
   @CsvFileSource(resources = "/scenarios/scenarios.csv")
   void playGames(String game) {
-    Assumptions.assumeThat(isNotDisabled(game)).as("%s is disabled", game).isTrue();
-    Scenario scenario = loadGame(game);
-    GameContext context = playGame(scenario.commands());
+    ScenarioContext scenarioContext = buildScenarioContext(game);
+    Assumptions.assumeThat(scenarioContext.isNotDisabled()).as(scenarioContext.getDisabledReason()).isTrue();
+
+    GameContext context = playGame(scenarioContext.getScenario().commands());
 
     assertThat(context.getGameOutput())
-      .contains(scenario.expectations());
+      .contains(scenarioContext.getScenario().expectations());
 
   }
+
+  private ScenarioContext buildScenarioContext(final String gameName) {
+    ScenarioContextBuilder scenarioContextBuilder = ScenarioContext.builder()
+      .withName(gameName)
+      .withScenario(loadGame(gameName));
+
+    scenarioContextBuilder = isDisabled(gameName) ? scenarioContextBuilder
+      .withDisabledReason(getDisabledReason(gameName)) : scenarioContextBuilder.enabled();
+    return scenarioContextBuilder.build();
+  }
+
+  private String getDisabledReason(String gameName) {
+    String[] gameCommands = loadGameCommands(gameName);
+    return Stream.of(gameCommands)
+      .map(StringUtils::trimToNull)
+      .filter(command -> StringUtils.startsWithIgnoreCase(command, "why:"))
+      .map(command -> StringUtils.substring(command, "why:".length(), command.length()))
+      .map(StringUtils::trimToNull)
+      .findAny()
+      .orElseGet(() -> gameName + "is disabled but has no reason. Add a line \"why: a reason\" to scenario file");
+  }
+
+  private String[] loadGameCommands(String gameName) {
+    String potentialGameName = convertScenarioToGameName(gameName);
+    Optional<String> actualGameName = determineRealGameName(potentialGameName);
+    return actualGameName.map(this::readFileLines).orElseGet(() -> new String[0]);
+  }
+
+  private Optional<String> determineRealGameName(String potentialGameName) {
+    return Optional.of(potentialGameName)
+      .map(filename -> "scenarios/"+filename)
+      .filter(this::fileExists)
+      .or(() -> Optional.of(potentialGameName)
+        .map(filename -> StringUtils.replace(filename, ".txt", "-disabled.txt"))
+        .map(filename -> "scenarios/"+filename)
+        .filter(this::fileExists));
+  }
+
 
   private String generateExpectedGames(String[] currentGameNames, String[] potentialGameNames) {
     return Stream.of(potentialGameNames)
@@ -76,6 +118,10 @@ public class TheDarkOfDarknessTest {
     String disabledGameName = StringUtils.replace(convertScenarioToGameName(game), ".txt", "-disabled.txt");
     String[] gameNames = findGameNames();
     return !ArrayUtils.contains(gameNames, disabledGameName);
+  }
+
+  private boolean isDisabled(String game) {
+    return !isNotDisabled(game);
   }
 
 
@@ -102,21 +148,43 @@ public class TheDarkOfDarknessTest {
   }
 
   private Scenario loadGame(String game) {
+
     final String gameName = convertScenarioToGameName(game);
 
-    return new Scenario(
-      readFile("scenarios/" + gameName),
+    return ScenarioContext.builder().withName(game).withScenario(new Scenario(
+      Stream.of(loadGameCommands(game)).reduce((left, right) -> left + "\n" + right).orElse(null),
       readFile("scenarios/" + StringUtils.replace(gameName, ".txt", "-expectation.txt"))
-    );
+    )).build().getScenario();
   }
 
-  private String readFile(String filename) {
+  private boolean fileExists(String filename) {
+    try {
+      Optional<URL> systemResource = Optional.ofNullable(ClassLoader.getSystemResource(filename));
+
+      if(systemResource.isEmpty()) {
+        return false;
+      }
+      URI uri = systemResource.get().toURI();
+      return Files.exists(Path.of(uri));
+    } catch (Exception exception) {
+      throw new RuntimeException("Failed to check " + filename, exception);
+    }
+  }
+
+  private String[] readFileLines(String filename) {
     try {
       URI uri = ClassLoader.getSystemResource(filename).toURI();
-      return Files.readString(Path.of(uri));
+      return Files.readAllLines(Path.of(uri)).toArray(String[]::new);
     } catch (Exception exception) {
       throw new RuntimeException("Failed to read " + filename, exception);
     }
+  }
+
+  private String readFile(String filename) {
+    return Stream.of(readFileLines(filename))
+      .map(StringUtils::trimToNull)
+      .reduce((left, right) -> left + "\n" + right)
+      .orElse(null);
   }
 
   private String[] findFilenames(String classpathDirectory) {
@@ -218,4 +286,87 @@ public class TheDarkOfDarknessTest {
   }
 
 
+  public static class ScenarioContext {
+    private String name;
+    private Scenario scenario;
+    private boolean isDisabled;
+    private String disabledReason;
+
+    public String getName() {
+      return name;
+    }
+
+    private void setName(String name) {
+      this.name = name;
+    }
+
+    public Scenario getScenario() {
+      return scenario;
+    }
+
+    private void setScenario(Scenario scenario) {
+      this.scenario = scenario;
+    }
+
+    public boolean isDisabled() {
+      return isDisabled;
+    }
+
+    public boolean isNotDisabled() {
+      return !isDisabled();
+    }
+
+    private void setDisabled(boolean disabled) {
+      isDisabled = disabled;
+    }
+
+    public String getDisabledReason() {
+      return disabledReason;
+    }
+
+    private void setDisabledReason(String disabledReason) {
+      this.disabledReason = disabledReason;
+    }
+
+    public static ScenarioContextBuilder builder() {
+      return new ScenarioContextBuilder();
+    }
+
+    public static class ScenarioContextBuilder implements Builder<ScenarioContext>{
+
+      private ScenarioContext instance = new ScenarioContext();
+
+      public String getName() {
+        return instance.getName();
+      }
+
+      public ScenarioContextBuilder withName(String name) {
+        instance.setName(name);
+        return this;
+      }
+
+      public ScenarioContextBuilder withScenario(Scenario scenario) {
+        instance.setScenario(scenario);
+        return this;
+      }
+
+      public ScenarioContextBuilder enabled() {
+        instance.setDisabledReason(null);
+        instance.setDisabled(false);
+        return this;
+      }
+      public ScenarioContextBuilder withDisabledReason(String disabledReason) {
+        instance.setDisabledReason(disabledReason);
+        instance.setDisabled(true);
+        return this;
+      }
+      @Override
+      public ScenarioContext build() {
+        final ScenarioContext result = instance;
+        instance = null;
+        return result;
+      }
+    }
+
+  }
 }

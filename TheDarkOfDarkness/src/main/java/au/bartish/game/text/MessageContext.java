@@ -23,7 +23,7 @@ public record MessageContext(Location location, Inventory inventory) {
     }
 
     @Override
-    public MessageContext builder() {
+    public MessageContext build() {
       return new MessageContext(location, inventory);
     }
   }
