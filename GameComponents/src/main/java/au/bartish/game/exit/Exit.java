@@ -2,6 +2,7 @@ package au.bartish.game.exit;
 
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.Location;
+import au.bartish.game.model.ActionContext;
 
 public class Exit extends BaseItemContainer implements Location {
 
@@ -14,11 +15,17 @@ public class Exit extends BaseItemContainer implements Location {
     }
 
     public Location doAction(String action) {
-        System.exit(0);
+        handleAction(null);
         return this;
     }
 
-    public String getDisplayName() {
+  @Override
+  public ActionContext handleAction(ActionContext actionContext) {
+    System.exit(0);
+    return null;
+  }
+
+  public String getDisplayName() {
         return "The End!";
     }
 }

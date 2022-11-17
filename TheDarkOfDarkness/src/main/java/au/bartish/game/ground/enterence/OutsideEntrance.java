@@ -3,6 +3,7 @@ package au.bartish.game.ground.enterence;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
+import au.bartish.game.model.ActionContext;
 
 public class OutsideEntrance extends MansionLocation {
 
@@ -22,6 +23,13 @@ public class OutsideEntrance extends MansionLocation {
 
   public String getQuestion() {
     return "Do you go inside?";
+  }
+
+  @Override
+  public ActionContext handleAction(ActionContext actionContext) {
+    return ActionContext.builderFromContext(actionContext)
+      .withNextLocation(doAction(actionContext.getAction()))
+      .build();
   }
 
   public Location doAction(String action) {

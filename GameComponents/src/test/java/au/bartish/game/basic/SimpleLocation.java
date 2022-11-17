@@ -2,6 +2,7 @@ package au.bartish.game.basic;
 
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.Location;
+import au.bartish.game.model.ActionContext;
 
 import static au.bartish.game.basic.SimpleArtifact.SOMETHING;
 
@@ -23,12 +24,21 @@ public class SimpleLocation  extends BaseItemContainer implements Location {
 
     @Override
     public Location doAction(String action) {
-        return (action.equalsIgnoreCase("yes"))
-                ? new AnotherSimpleLocation()
-                : this;
+      return handleAction(ActionContext.builder()
+        .withAction(action)
+        .withCurrentLocation(this)
+        .build())
+        .getNextLocation();
     }
 
-    @Override
+  @Override
+  public ActionContext handleAction(ActionContext actionContext) {
+    return ActionContext.builderFromContext(actionContext)
+      .withNextLocation(actionContext.actionIsOneOf("yes") ? new AnotherSimpleLocation() : this)
+      .build();
+  }
+
+  @Override
     public String getDisplayName() {
         return "Simple Location";
     }

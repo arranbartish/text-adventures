@@ -3,6 +3,7 @@ package au.bartish.game.ground.yard;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
+import au.bartish.game.model.ActionContext;
 
 public class UnderTree extends MansionLocation {
 
@@ -36,6 +37,12 @@ public class UnderTree extends MansionLocation {
     return "What would you like to ask?";
   }
 
+  @Override
+  public ActionContext handleAction(ActionContext actionContext) {
+    return ActionContext.builderFromContext(actionContext)
+      .withNextLocation(doAction(actionContext.getAction()))
+      .build();
+  }
   @Override
   public Location doAction(String action) {
     if (action.equalsIgnoreCase("stop")

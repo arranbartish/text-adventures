@@ -4,6 +4,7 @@ import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
+import au.bartish.game.model.ActionContext;
 
 import static au.bartish.game.Artifact.*;
 
@@ -29,6 +30,13 @@ public class Wardrobe extends MansionLocation {
 
   public String getQuestion() {
     return "What do you want to do?";
+  }
+
+  @Override
+  public ActionContext handleAction(ActionContext actionContext) {
+    return ActionContext.builderFromContext(actionContext)
+      .withNextLocation(doAction(actionContext.getAction()))
+      .build();
   }
 
   public Location doAction(String action) {

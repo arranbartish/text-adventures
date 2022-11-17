@@ -3,6 +3,7 @@ package au.bartish.game.ground.livingroom;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
+import au.bartish.game.model.ActionContext;
 
 import static au.bartish.game.Artifact.BEACH_BALL;
 import static au.bartish.game.Artifact.RUBBER_DUCK;
@@ -30,6 +31,14 @@ public class LivingRoom extends MansionLocation {
 
   public String getQuestion() {
     return "What would you like to do?";
+  }
+
+
+  @Override
+  public ActionContext handleAction(ActionContext actionContext) {
+    return ActionContext.builderFromContext(actionContext)
+      .withNextLocation(doAction(actionContext.getAction()))
+      .build();
   }
 
   public Location doAction(String action) {

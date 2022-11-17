@@ -3,6 +3,9 @@ package au.bartish.game.ground.hallway;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
+import au.bartish.game.model.ActionContext;
+import au.bartish.game.model.ActionContext.ActionContextBuilder;
+import au.bartish.game.model.Message;
 
 public class Hallway extends MansionLocation {
 
@@ -32,17 +35,29 @@ public class Hallway extends MansionLocation {
     return "Which door do you want to open";
   }
 
-  public Location doAction(String action) {
-    if (action.equalsIgnoreCase("north")) {
-      return getHouse().get("wardrobe");
-    } else if (action.equalsIgnoreCase("west")) {
-      return getHouse().get("kitchen");
-    } else if (action.equalsIgnoreCase("east")) {
-      return getHouse().get("livingRoom");
+  @Override
+  public ActionContext handleAction(ActionContext actionContext) {
+    ActionContextBuilder actionContextBuilder = ActionContext.builderFromContext(actionContext);
+    if (actionContext.actionIsOneOf("north")) {
+      actionContextBuilder.withNextLocation(getHouse().get("wardrobe"));
+    } else if (actionContext.actionIsOneOf("west")) {
+      actionContextBuilder.withNextLocation(getHouse().get("kitchen"));
+    } else if (actionContext.actionIsOneOf("east")) {
+      actionContextBuilder.withNextLocation(getHouse().get("livingRoom"));
+    } else {
+      actionContextBuilder.withNextLocation(this)
+        .addMessage(Message.builder()
+          .withContent("You stand there thinking about which direction to go.")
+          .build());
     }
+    return actionContextBuilder.build();
+  }
 
-    getHouse().getOut().println("You stand there thinking about which direction to go.");
-    return this;
+  public Location doAction(String action) {
+    return handleAction(ActionContext.builder()
+      .withCurrentLocation(this)
+      .withAction(action)
+      .build()).getNextLocation();
   }
 
   public String getDisplayName() {

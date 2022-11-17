@@ -1,9 +1,13 @@
 package au.bartish.game;
 
+import au.bartish.game.model.ActionContext;
+import au.bartish.game.model.ActionContext.ActionContextBuilder;
+import au.bartish.game.model.Message;
 import au.bartish.game.utilities.TextProvider;
 
 import java.io.PrintStream;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Scanner;
 
 import static au.bartish.game.Item.create;
@@ -12,8 +16,9 @@ import static org.apache.commons.collections.CollectionUtils.get;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
+import static org.apache.commons.lang3.StringUtils.trim;
 
-public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
+public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implements Game {
 
     private final GameArtifact<ARTIFACT> defaultArtifact;
     private final Scanner scanner;
@@ -32,36 +37,62 @@ public abstract class GameTick<ARTIFACT extends GameArtifact> implements Game {
         out.println(getCurrentLocation().getStory());
         out.println(getCurrentLocation().getQuestion());
         final String response = lowerCase(scanner.nextLine());
-        globalActionHandler(response, getCurrentLocation(), getInventory());
-        updateLocation(getCurrentLocation().doAction(response));
+
+      ActionContext actionContext = globalActionHandler(response, getCurrentLocation(), getInventory());
+
+      actionContext = getCurrentLocation().handleAction(actionContext);
+
+      updateLocation(actionContext.getNextLocation());
+
+      actionContext
+        .getMessages()
+        .forEach(this::print);
     }
 
-    public abstract TextProvider getTextProvider();
+  private void print(Message message) {
+    //noinspection unchecked
+    String messageString = Optional.of(message)
+      .filter(Message::isContent)
+      .map(Message::getContent)
+      .orElseGet(() -> getTextProvider().resolveText(message.getContentKey(), message.getContentContext()));
+    out.println(messageString);
+  }
+
+  public abstract TextProvider getTextProvider();
 
 
+    private ActionContext globalActionHandler(String action, Location location, ItemContainer container) {
+      ActionContext context = ActionContext.builder()
+        .withAction(action)
+        .withCurrentLocation(location)
+        .withContainer(container)
+        .build();
+      ActionContextBuilder contextBuilder = ActionContext.builderFromContext(context);
 
 
-    private void globalActionHandler(String action, Location location, ItemContainer backpack) {
+      if (context.actionIsOneOf("look around")){
+        contextBuilder.addMessage(Message.builder().withContent(
+          format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
+            ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems()))).build());
 
-        if (action.equalsIgnoreCase("look around")){
-            out.println(format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
-                    ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems())));
-        } else if (action.equalsIgnoreCase("take all")) {
+        } else if (context.actionIsOneOf("take all")) {
           moveAllItems(location, getInventory());
-        } else if (action.equalsIgnoreCase("drop all")) {
+        } else if (context.actionIsOneOf("drop all")) {
           moveAllItems(getInventory(), location);
-        } else if (action.startsWith("take")) {
-            String queryItem = action.replaceAll("take ", "");
+        } else if (context.actionStartsWith("take")) {
+            String queryItem = trim(context.getAction().replaceAll("take", ""));
             moveItemFrom(location, getInventory(), queryItem, "%s is not in the %s");
-        } else if (action.startsWith("drop")) {
-            String queryItem = action.replaceAll("drop ", "");
+        } else if (context.actionStartsWith("drop")) {
+            String queryItem = trim(context.getAction().replaceAll("drop ", ""));
             moveItemFrom(getInventory(), location, queryItem, "%s is not in your %s");
-        } else if (contains(getInventory()
-                .listInventoryCommands(), action)) {
+        } else if (context.actionIsOneOf(getInventory().listInventoryCommands())) {
             out.println(format("your %s %s", getInventory().getDisplayName(),
-                    ((backpack.isEmpty())? "has nothing in it": "contains:"+backpack.listItems())));
+                    ((container.isEmpty())? "has nothing in it": "contains:"+container.listItems())));
         }
+
+      return contextBuilder.build();
     }
+
 
   private void moveAllItems(ItemContainer from, ItemContainer to) {
     itemMover.moveAllItems(from, to);

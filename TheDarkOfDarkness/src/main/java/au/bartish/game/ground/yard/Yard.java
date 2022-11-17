@@ -4,6 +4,7 @@ import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
+import au.bartish.game.model.ActionContext;
 
 import static au.bartish.game.Artifact.*;
 import static au.bartish.game.Artifact.OVEN;
@@ -39,6 +40,12 @@ public class Yard extends MansionLocation {
     return "What would you like to do?";
   }
 
+  @Override
+  public ActionContext handleAction(ActionContext actionContext) {
+    return ActionContext.builderFromContext(actionContext)
+      .withNextLocation(doAction(actionContext.getAction()))
+      .build();
+  }
   @Override
   public Location doAction(String action) {
     if (action.equalsIgnoreCase("return") || action.equalsIgnoreCase("house") ) {
