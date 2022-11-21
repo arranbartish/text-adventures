@@ -1,6 +1,7 @@
 package au.bartish.game;
 
 import au.bartish.game.TheDarkOfDarknessTest.ScenarioContext.ScenarioContextBuilder;
+import au.bartish.game.model.GameContext;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -227,7 +229,7 @@ public class TheDarkOfDarknessTest {
     return new GameContext(input);
   }
 
-  private static class ExecuteXTimes implements Supplier<Boolean> {
+  private static class ExecuteXTimes implements Function<au.bartish.game.model.GameContext, Boolean> {
 
     private int times;
 
@@ -236,8 +238,8 @@ public class TheDarkOfDarknessTest {
     }
 
     @Override
-    public Boolean get() {
-      return (times-- != 0);
+    public Boolean apply(au.bartish.game.model.GameContext context) {
+      return context.isNotGameOver() && times-- > 1;
     }
   }
 

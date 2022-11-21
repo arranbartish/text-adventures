@@ -1,13 +1,11 @@
 package au.bartish.game.ground.yard;
 
-import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
-import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
-import au.bartish.game.model.ActionContext;
+import au.bartish.game.model.GameContext;
+import au.bartish.game.model.GameContext.ActionContextBuilder;
 
 import static au.bartish.game.Artifact.*;
-import static au.bartish.game.Artifact.OVEN;
 
 public class Yard extends MansionLocation {
 
@@ -41,21 +39,18 @@ public class Yard extends MansionLocation {
   }
 
   @Override
-  public ActionContext handleAction(ActionContext actionContext) {
-    return ActionContext.builderFromContext(actionContext)
-      .withNextLocation(doAction(actionContext.getAction()))
-      .build();
-  }
-  @Override
-  public Location doAction(String action) {
-    if (action.equalsIgnoreCase("return") || action.equalsIgnoreCase("house") ) {
-      return getHouse().get("livingRoom");
-    } else if (action.equalsIgnoreCase("elf") ) {
-      return getHouse().get("tree");
-    } else if (action.equalsIgnoreCase("shed") || action.equalsIgnoreCase("enter") ) {
-
+  public GameContext handleAction(GameContext gameContext) {
+    ActionContextBuilder actionContextBuilder = GameContext.builderFromContext(gameContext);
+    if (gameContext.actionIsOneOf("return", "house" )) {
+      actionContextBuilder.withNextLocation(getHouse().get("livingRoom"));
+    } else if (gameContext.actionIsOneOf("elf") ) {
+      actionContextBuilder.withNextLocation(getHouse().get("tree"));
+    } else if (gameContext.actionIsOneOf("shed", "enter")) {
+      actionContextBuilder.withNextLocation(this);
+    } else {
+      actionContextBuilder.withNextLocation(this);
     }
-    return this;
+    return actionContextBuilder.build();
   }
 
   @Override

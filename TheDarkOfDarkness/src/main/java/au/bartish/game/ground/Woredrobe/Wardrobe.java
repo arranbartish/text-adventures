@@ -1,10 +1,11 @@
 package au.bartish.game.ground.Woredrobe;
 
-import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
-import au.bartish.game.model.ActionContext;
+import au.bartish.game.model.GameContext;
+import au.bartish.game.model.GameContext.ActionContextBuilder;
+import au.bartish.game.model.Message;
 
 import static au.bartish.game.Artifact.*;
 
@@ -33,20 +34,20 @@ public class Wardrobe extends MansionLocation {
   }
 
   @Override
-  public ActionContext handleAction(ActionContext actionContext) {
-    return ActionContext.builderFromContext(actionContext)
-      .withNextLocation(doAction(actionContext.getAction()))
-      .build();
+  public GameContext handleAction(GameContext gameContext) {
+    ActionContextBuilder actionContextBuilder = GameContext.builderFromContext(gameContext);
+
+    if (gameContext.actionIsOneOf("exit")) {
+      actionContextBuilder.withNextLocation(getHouse().get("hallway"))
+          .addMessage(Message.builder().withContent("You leave the wardrobe").build());
+    } else {
+      actionContextBuilder.withNextLocation(this)
+        .addMessage(Message.builder().withContent("You sit in the wardrobe thinking. It is a nice wardrobe").build());
+    }
+
+    return actionContextBuilder.build();
   }
 
-  public Location doAction(String action) {
-    if (action.equalsIgnoreCase("exit")) {
-      getHouse().getOut().println("You leave the wardrobe");
-      return getHouse().get("hallway");
-    }
-    getHouse().getOut().println("You sit in the wardrobe thinking. It is a nice wardrobe");
-    return this;
-  }
 
   public String getDisplayName() {
     return "wardrobe";

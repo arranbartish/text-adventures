@@ -1,14 +1,11 @@
 package au.bartish.game;
 
-import au.bartish.game.model.ActionContext;
+import au.bartish.game.model.GameContext;
 
 public interface Location extends ItemContainer{
 
     String getStory();
     String getQuestion();
-    @Deprecated
-    Location doAction(String action);
-
-    ActionContext handleAction(ActionContext actionContext);
+    GameContext handleAction(GameContext gameContext);
     String getDisplayName();
 }

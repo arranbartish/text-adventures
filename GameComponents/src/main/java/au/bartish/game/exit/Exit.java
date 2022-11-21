@@ -2,7 +2,7 @@ package au.bartish.game.exit;
 
 import au.bartish.game.BaseItemContainer;
 import au.bartish.game.Location;
-import au.bartish.game.model.ActionContext;
+import au.bartish.game.model.GameContext;
 
 public class Exit extends BaseItemContainer implements Location {
 
@@ -20,7 +20,7 @@ public class Exit extends BaseItemContainer implements Location {
     }
 
   @Override
-  public ActionContext handleAction(ActionContext actionContext) {
+  public GameContext handleAction(GameContext gameContext) {
     System.exit(0);
     return null;
   }

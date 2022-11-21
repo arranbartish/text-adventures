@@ -1,9 +1,10 @@
 package au.bartish.game.ground.enterence;
 
 import au.bartish.game.House;
-import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
-import au.bartish.game.model.ActionContext;
+import au.bartish.game.model.GameContext;
+import au.bartish.game.model.GameContext.ActionContextBuilder;
+import au.bartish.game.model.Message;
 
 public class OutsideEntrance extends MansionLocation {
 
@@ -26,24 +27,27 @@ public class OutsideEntrance extends MansionLocation {
   }
 
   @Override
-  public ActionContext handleAction(ActionContext actionContext) {
-    return ActionContext.builderFromContext(actionContext)
-      .withNextLocation(doAction(actionContext.getAction()))
-      .build();
-  }
+  public GameContext handleAction(GameContext gameContext) {
+    ActionContextBuilder actionContextBuilder = GameContext.builderFromContext(gameContext);
 
-  public Location doAction(String action) {
-    if (action.equalsIgnoreCase("yes")) {
-      getHouse().getOut().println("You go inside.");
-      return getHouse().get("hallway");
-    } else if (action.equalsIgnoreCase("no")) {
-      getHouse().getOut().println("You walk away and get eaten by a monster in the village.");
-      System.exit(0);
+    if (gameContext.actionIsOneOf("yes")) {
+      actionContextBuilder.addMessage(Message.builder()
+         .withContent("You go inside.")
+         .build())
+        .withNextLocation(getHouse().get("hallway"));
+    } else if (gameContext.actionIsOneOf("no")) {
+        actionContextBuilder.addMessage(Message.builder()
+            .withContent("You walk away and get eaten by a monster in the village.")
+            .build())
+          .gameOver();
     } else {
-      getHouse().getOut().println("You stand there thinking about if you want to go in.");
-      return this;
+      actionContextBuilder.addMessage(Message.builder()
+          .withContent("You stand there thinking about if you want to go in.")
+          .build())
+        .withNextLocation(this);
     }
-    return null;
+
+    return actionContextBuilder.build();
   }
 
   public String getDisplayName() {

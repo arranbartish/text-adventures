@@ -1,10 +1,9 @@
 package au.bartish.game.ground.hallway;
 
 import au.bartish.game.House;
-import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
-import au.bartish.game.model.ActionContext;
-import au.bartish.game.model.ActionContext.ActionContextBuilder;
+import au.bartish.game.model.GameContext;
+import au.bartish.game.model.GameContext.ActionContextBuilder;
 import au.bartish.game.model.Message;
 
 public class Hallway extends MansionLocation {
@@ -36,13 +35,13 @@ public class Hallway extends MansionLocation {
   }
 
   @Override
-  public ActionContext handleAction(ActionContext actionContext) {
-    ActionContextBuilder actionContextBuilder = ActionContext.builderFromContext(actionContext);
-    if (actionContext.actionIsOneOf("north")) {
+  public GameContext handleAction(GameContext gameContext) {
+    ActionContextBuilder actionContextBuilder = GameContext.builderFromContext(gameContext);
+    if (gameContext.actionIsOneOf("north")) {
       actionContextBuilder.withNextLocation(getHouse().get("wardrobe"));
-    } else if (actionContext.actionIsOneOf("west")) {
+    } else if (gameContext.actionIsOneOf("west")) {
       actionContextBuilder.withNextLocation(getHouse().get("kitchen"));
-    } else if (actionContext.actionIsOneOf("east")) {
+    } else if (gameContext.actionIsOneOf("east")) {
       actionContextBuilder.withNextLocation(getHouse().get("livingRoom"));
     } else {
       actionContextBuilder.withNextLocation(this)
@@ -51,13 +50,6 @@ public class Hallway extends MansionLocation {
           .build());
     }
     return actionContextBuilder.build();
-  }
-
-  public Location doAction(String action) {
-    return handleAction(ActionContext.builder()
-      .withCurrentLocation(this)
-      .withAction(action)
-      .build()).getNextLocation();
   }
 
   public String getDisplayName() {

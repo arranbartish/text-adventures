@@ -3,7 +3,8 @@ package au.bartish.game.ground.kitchen;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
-import au.bartish.game.model.ActionContext;
+import au.bartish.game.model.GameContext;
+import au.bartish.game.model.GameContext.ActionContextBuilder;
 
 import static au.bartish.game.Artifact.*;
 
@@ -34,18 +35,15 @@ public class Kitchen extends MansionLocation {
   }
 
   @Override
-  public ActionContext handleAction(ActionContext actionContext) {
-    return ActionContext.builderFromContext(actionContext)
-      .withNextLocation(doAction(actionContext.getAction()))
-      .build();
+  public GameContext handleAction(GameContext gameContext) {
+    ActionContextBuilder actionContextBuilder = GameContext.builderFromContext(gameContext);
+
+    if (gameContext.actionIsOneOf("east")) {
+      actionContextBuilder.withNextLocation(getHouse().get("hallway"));
+    }
+    return actionContextBuilder.build();
   }
 
-  public Location doAction(String action) {
-    if (action.equalsIgnoreCase("east")) {
-      return getHouse().get("hallway");
-    }
-    return this;
-  }
 
   public String getDisplayName() {
     return "Kitchen";

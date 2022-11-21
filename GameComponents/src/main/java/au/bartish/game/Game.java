@@ -1,10 +1,12 @@
 package au.bartish.game;
 
+import au.bartish.game.model.GameContext;
+
 public interface Game {
 
     void welcome();
 
-    void tick();
+    GameContext tick();
 
     Location getCurrentLocation();
 

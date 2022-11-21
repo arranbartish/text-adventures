@@ -1,9 +1,10 @@
 package au.bartish.game.ground.yard;
 
 import au.bartish.game.House;
-import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
-import au.bartish.game.model.ActionContext;
+import au.bartish.game.model.GameContext;
+import au.bartish.game.model.GameContext.ActionContextBuilder;
+import au.bartish.game.model.Message;
 
 public class UnderTree extends MansionLocation {
 
@@ -38,24 +39,23 @@ public class UnderTree extends MansionLocation {
   }
 
   @Override
-  public ActionContext handleAction(ActionContext actionContext) {
-    return ActionContext.builderFromContext(actionContext)
-      .withNextLocation(doAction(actionContext.getAction()))
-      .build();
-  }
-  @Override
-  public Location doAction(String action) {
-    if (action.equalsIgnoreCase("stop")
-      || action.equalsIgnoreCase("leave")
-      || action.equalsIgnoreCase("bye")
+  public GameContext handleAction(GameContext gameContext) {
+    ActionContextBuilder actionContextBuilder = GameContext.builderFromContext(gameContext);
+
+    if (gameContext.actionIsOneOf("stop","leave","bye")
     ) {
-      return getHouse().get("yard");
-    } else if (action.equalsIgnoreCase("monster")
-      || action.equalsIgnoreCase("monsters")
-        ||action.equalsIgnoreCase("village")) {
-      villageStory();
+      actionContextBuilder.withNextLocation(getHouse().get("yard"));
+    } else if (gameContext.actionIsOneOf("monster", "monsters","village")) {
+      actionContextBuilder.addMessage(Message.builder().withContent(villageStory()).build())
+        .withNextLocation(this);
+    } else {
+      actionContextBuilder
+        .withNextLocation(this);
     }
-    return this;
+
+    return
+      actionContextBuilder
+      .build();
   }
 
   private String getPrefix() {
@@ -64,8 +64,9 @@ public class UnderTree extends MansionLocation {
     return result;
   }
 
-  private void villageStory() {
-    prefix = """
+  private String villageStory() {
+    return
+      """
       On a beautiful da, the sorcerer who owns this mansion
       wonted to grow his power with an army of monstrous
       minions, but the spell went wrong and his monsters went

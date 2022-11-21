@@ -3,7 +3,8 @@ package au.bartish.game.ground.livingroom;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 import au.bartish.game.MansionLocation;
-import au.bartish.game.model.ActionContext;
+import au.bartish.game.model.GameContext;
+import au.bartish.game.model.GameContext.ActionContextBuilder;
 
 import static au.bartish.game.Artifact.BEACH_BALL;
 import static au.bartish.game.Artifact.RUBBER_DUCK;
@@ -35,20 +36,22 @@ public class LivingRoom extends MansionLocation {
 
 
   @Override
-  public ActionContext handleAction(ActionContext actionContext) {
-    return ActionContext.builderFromContext(actionContext)
-      .withNextLocation(doAction(actionContext.getAction()))
+  public GameContext handleAction(GameContext gameContext) {
+
+    ActionContextBuilder actionContextBuilder = GameContext.builderFromContext(gameContext);
+
+    if (gameContext.actionIsOneOf("west")) {
+      actionContextBuilder.withNextLocation(getHouse().get("hallway"));
+    } else if (gameContext.actionIsOneOf("exit")) {
+      actionContextBuilder.withNextLocation(getHouse().get("yard"));
+    } else {
+      actionContextBuilder.withNextLocation(this);
+    }
+
+    return actionContextBuilder
       .build();
   }
 
-  public Location doAction(String action) {
-    if (action.equalsIgnoreCase("west")) {
-      return getHouse().get("hallway");
-    } else if (action.equalsIgnoreCase("exit")) {
-      return getHouse().get("yard");
-    }
-    return this;
-  }
 
   public String getDisplayName() {
     return "living room";

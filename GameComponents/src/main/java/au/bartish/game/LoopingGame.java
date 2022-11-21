@@ -1,16 +1,21 @@
 package au.bartish.game;
 
+import au.bartish.game.model.GameContext;
+
 import java.io.PrintStream;
+import java.util.Optional;
 import java.util.Scanner;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class LoopingGame<ARTIFACT extends GameArtifact> implements Game, GameWrapper {
 
-    private final GameArtifact<ARTIFACT> defaultArtifact;
+  private static final Boolean FIRST_TICK = true;
+  private final GameArtifact<ARTIFACT> defaultArtifact;
     private final Game game;
     private final Scanner scanner;
     private final PrintStream out;
-    private Supplier<Boolean> willContinue = () -> true;
+    private Function<GameContext,Boolean> willContinue = GameContext::isNotGameOver;
 
     public LoopingGame(GameArtifact<ARTIFACT> defaultArtifact,
                        Game game,
@@ -28,8 +33,8 @@ public class LoopingGame<ARTIFACT extends GameArtifact> implements Game, GameWra
     }
 
     @Override
-    public void tick() {
-       game.tick();
+    public GameContext tick() {
+       return game.tick();
     }
 
     @Override
@@ -41,8 +46,10 @@ public class LoopingGame<ARTIFACT extends GameArtifact> implements Game, GameWra
     public void execute() {
         welcome();
 
-        while (willContinue.get()) {
-            tick();
+        GameContext context = null;
+        while (Optional.ofNullable(context).map(willContinue).orElse(FIRST_TICK))
+        {
+          context = tick();
         }
     }
 
@@ -56,7 +63,7 @@ public class LoopingGame<ARTIFACT extends GameArtifact> implements Game, GameWra
         game.updateLocation(newLocation);
     }
 
-    public void setWillContinue(Supplier<Boolean> willContinue) {
+    public void setWillContinue(Function<GameContext,Boolean> willContinue) {
         this.willContinue = willContinue;
     }
 }

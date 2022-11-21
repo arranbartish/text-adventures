@@ -1,7 +1,7 @@
 package au.bartish.game;
 
-import au.bartish.game.model.ActionContext;
-import au.bartish.game.model.ActionContext.ActionContextBuilder;
+import au.bartish.game.model.GameContext;
+import au.bartish.game.model.GameContext.ActionContextBuilder;
 import au.bartish.game.model.Message;
 import au.bartish.game.utilities.TextProvider;
 
@@ -33,20 +33,22 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
     }
 
     @Override
-    public void tick() {
+    public GameContext tick() {
         out.println(getCurrentLocation().getStory());
         out.println(getCurrentLocation().getQuestion());
         final String response = lowerCase(scanner.nextLine());
 
-      ActionContext actionContext = globalActionHandler(response, getCurrentLocation(), getInventory());
+      GameContext gameContext = globalActionHandler(response, getCurrentLocation(), getInventory());
 
-      actionContext = getCurrentLocation().handleAction(actionContext);
+      gameContext = getCurrentLocation().handleAction(gameContext);
 
-      updateLocation(actionContext.getNextLocation());
+      updateLocation(Optional.ofNullable(gameContext.getNextLocation()).orElse(gameContext.getCurrentLocation()));
 
-      actionContext
+      gameContext
         .getMessages()
         .forEach(this::print);
+
+      return gameContext;
     }
 
   private void print(Message message) {
@@ -61,13 +63,13 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
   public abstract TextProvider getTextProvider();
 
 
-    private ActionContext globalActionHandler(String action, Location location, ItemContainer container) {
-      ActionContext context = ActionContext.builder()
+    private GameContext globalActionHandler(String action, Location location, ItemContainer container) {
+      GameContext context = GameContext.builder()
         .withAction(action)
         .withCurrentLocation(location)
         .withContainer(container)
         .build();
-      ActionContextBuilder contextBuilder = ActionContext.builderFromContext(context);
+      ActionContextBuilder contextBuilder = GameContext.builderFromContext(context);
 
 
       if (context.actionIsOneOf("look around")){
@@ -86,8 +88,11 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
             String queryItem = trim(context.getAction().replaceAll("drop ", ""));
             moveItemFrom(getInventory(), location, queryItem, "%s is not in your %s");
         } else if (context.actionIsOneOf(getInventory().listInventoryCommands())) {
-            out.println(format("your %s %s", getInventory().getDisplayName(),
-                    ((container.isEmpty())? "has nothing in it": "contains:"+container.listItems())));
+        contextBuilder.addMessage(Message.builder()
+            .withContent(
+              format("your %s %s", getInventory().getDisplayName(), (container.isEmpty())? "has nothing in it": "contains:"+container.listItems())
+            )
+          .build());
         }
 
       return contextBuilder.build();

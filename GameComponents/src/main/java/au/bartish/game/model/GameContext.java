@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class ActionContext {
+public class GameContext {
 
   private String action;
 
@@ -21,6 +21,10 @@ public class ActionContext {
   private List<ItemContainer> containersAvailable;
 
   private List<Message> messages;
+
+  private List<Runnable> methods;
+
+  private boolean gameOver = false;
 
   public boolean actionIsOneOf(String... actions) {
     return Stream.of(actions).anyMatch(potentialAction -> potentialAction.equalsIgnoreCase(action));
@@ -34,7 +38,7 @@ public class ActionContext {
     return new ActionContextBuilder();
   }
 
-  public static ActionContextBuilder builderFromContext(ActionContext context) {
+  public static ActionContextBuilder builderFromContext(GameContext context) {
     return builder()
       .withCurrentLocation(context.getCurrentLocation())
       .withNextLocation(context.getNextLocation())
@@ -106,19 +110,52 @@ public class ActionContext {
   }
 
   private void addMessage(Message message) {
-    this.messages = Optional.ofNullable(this.messages)
-      .orElseGet(ArrayList::new);
-    this.messages.add(message);
+    addMessages(List.of(message));
   }
 
 
-  public static class ActionContextBuilder implements Builder<ActionContext> {
+  public List<Runnable> getMethods() {
+    return Optional.ofNullable(methods).map(List::copyOf).orElseGet(List::of);
+  }
 
-    private ActionContext instance = new ActionContext();
+  private void setMethods(List<Runnable> methods) {
+    this.methods = Optional.ofNullable(this.methods)
+      .stream()
+      .peek(List::clear)
+      .findAny()
+      .orElseGet(ArrayList::new);
+    this.methods.addAll(methods);
+  }
+
+  private void addMethods(List<Runnable> methods) {
+    this.methods = Optional.ofNullable(this.methods)
+      .orElseGet(ArrayList::new);
+    this.methods.addAll(methods);
+  }
+
+  private void addMethod(Runnable method) {
+    addMethods(List.of(method));
+  }
+
+  private void setGameOver() {
+    gameOver = true;
+  }
+
+  public boolean isGameOver() {
+    return gameOver;
+  }
+
+  public boolean isNotGameOver() {
+    return !isGameOver();
+  }
+
+  public static class ActionContextBuilder implements Builder<GameContext> {
+
+    private GameContext instance = new GameContext();
 
     @Override
-    public ActionContext build() {
-      final ActionContext result = instance;
+    public GameContext build() {
+      final GameContext result = instance;
       instance = null;
       return result;
     }
@@ -150,6 +187,16 @@ public class ActionContext {
 
     public ActionContextBuilder withMessages(List<Message> messages) {
       instance.setMessages(messages);
+      return this;
+    }
+
+    public ActionContextBuilder withMethod(Runnable method) {
+      instance.addMethod(method);
+      return this;
+    }
+
+    public ActionContextBuilder gameOver() {
+      instance.setGameOver();
       return this;
     }
   }
