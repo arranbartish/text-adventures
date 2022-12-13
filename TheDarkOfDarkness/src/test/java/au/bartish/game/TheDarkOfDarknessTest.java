@@ -1,7 +1,6 @@
 package au.bartish.game;
 
 import au.bartish.game.TheDarkOfDarknessTest.ScenarioContext.ScenarioContextBuilder;
-import au.bartish.game.model.GameContext;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static au.bartish.game.Artifact.DEFAULT;

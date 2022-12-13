@@ -14,15 +14,10 @@ public class Exit extends BaseItemContainer implements Location {
         return "Press any key";
     }
 
-    public Location doAction(String action) {
-        handleAction(null);
-        return this;
-    }
 
   @Override
   public GameContext handleAction(GameContext gameContext) {
-    System.exit(0);
-    return null;
+      return GameContext.builderFromContext(gameContext).gameOver().build();
   }
 
   public String getDisplayName() {

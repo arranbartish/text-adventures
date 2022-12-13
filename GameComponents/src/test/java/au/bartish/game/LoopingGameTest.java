@@ -112,7 +112,7 @@ public class LoopingGameTest {
 
   @Test
   @Ignore("Items can be fixtures")
-  public void will_not_be_able_to_take_perminent_items() {
+  public void will_not_be_able_to_take_permanent_items() {
     GameBootstrapper context = playGame("yes\ntake oven");
     assertThat(context.getGameOutput(), containsString("You cannot take the oven, it is too heavy"));
   }
