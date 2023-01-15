@@ -45,9 +45,7 @@ public class Hallway extends MansionLocation {
       actionContextBuilder.withNextLocation(getHouse().get("livingRoom"));
     } else {
       actionContextBuilder.withNextLocation(this)
-        .addMessage(Message.builder()
-          .withContent("You stand there thinking about which direction to go.")
-          .build());
+        .addMessage("You stand there thinking about which direction to go.");
     }
     return actionContextBuilder.build();
   }

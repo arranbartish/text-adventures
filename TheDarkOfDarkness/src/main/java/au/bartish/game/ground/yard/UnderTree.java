@@ -46,7 +46,7 @@ public class UnderTree extends MansionLocation {
     ) {
       actionContextBuilder.withNextLocation(getHouse().get("yard"));
     } else if (gameContext.actionIsOneOf("monster", "monsters","village")) {
-      actionContextBuilder.addMessage(Message.builder().withContent(villageStory()).build())
+      actionContextBuilder.addMessage(villageStory())
         .withNextLocation(this);
     } else {
       actionContextBuilder

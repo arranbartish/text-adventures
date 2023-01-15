@@ -39,10 +39,10 @@ public class Wardrobe extends MansionLocation {
 
     if (gameContext.actionIsOneOf("exit")) {
       actionContextBuilder.withNextLocation(getHouse().get("hallway"))
-          .addMessage(Message.builder().withContent("You leave the wardrobe").build());
+          .addMessage("You leave the wardrobe");
     } else {
       actionContextBuilder.withNextLocation(this)
-        .addMessage(Message.builder().withContent("You sit in the wardrobe thinking. It is a nice wardrobe").build());
+        .addMessage("You sit in the wardrobe thinking. It is a nice wardrobe");
     }
 
     return actionContextBuilder.build();

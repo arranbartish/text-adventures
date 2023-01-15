@@ -31,19 +31,13 @@ public class OutsideEntrance extends MansionLocation {
     ActionContextBuilder actionContextBuilder = GameContext.builderFromContext(gameContext);
 
     if (gameContext.actionIsOneOf("yes")) {
-      actionContextBuilder.addMessage(Message.builder()
-         .withContent("You go inside.")
-         .build())
+      actionContextBuilder.addMessage("You go inside.")
         .withNextLocation(getHouse().get("hallway"));
     } else if (gameContext.actionIsOneOf("no")) {
-        actionContextBuilder.addMessage(Message.builder()
-            .withContent("You walk away and get eaten by a monster in the village.")
-            .build())
+        actionContextBuilder.addMessage("You walk away and get eaten by a monster in the village.")
           .gameOver();
     } else {
-      actionContextBuilder.addMessage(Message.builder()
-          .withContent("You stand there thinking about if you want to go in.")
-          .build())
+      actionContextBuilder.addMessage("You stand there thinking about if you want to go in.")
         .withNextLocation(this);
     }
 

@@ -71,9 +71,9 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
   private final Collection<ConditionalAction> globalActions =
     List.of(
       OneOfStringAction.of(
-        (context, builder) -> builder.addMessage(Message.builder().withContent(
+        (context, builder) -> builder.addMessage(
             format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
-              ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems()))).build())
+              ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems())))
           .build(),
         "look around"
       ),

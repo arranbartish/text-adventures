@@ -185,6 +185,11 @@ public class GameContext {
       return this;
     }
 
+    public ActionContextBuilder addMessage(String content) {
+      return addMessage(Message.builder().withContent(content).build());
+    }
+
+
     public ActionContextBuilder withMessages(List<Message> messages) {
       instance.setMessages(messages);
       return this;
