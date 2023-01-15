@@ -1,12 +1,15 @@
 package au.bartish.game;
 
+import au.bartish.game.model.ConditionalAction;
 import au.bartish.game.model.GameContext;
 import au.bartish.game.model.GameContext.ActionContextBuilder;
 import au.bartish.game.model.Message;
+import au.bartish.game.model.OneOfStringAction;
 import au.bartish.game.utilities.TextProvider;
 
 import java.io.PrintStream;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -24,6 +27,8 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
     private final Scanner scanner;
     private final PrintStream out;
     private final ItemMover itemMover = new ItemMover();
+    
+
 
 
     public GameTick(GameArtifact<ARTIFACT> defaultArtifact, Scanner scanner, PrintStream out) {
@@ -63,11 +68,37 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
   public abstract TextProvider getTextProvider();
 
 
-    private GameContext globalActionHandler(String action, Location location, ItemContainer container) {
+  private final Collection<ConditionalAction> globalActions =
+    List.of(
+      OneOfStringAction.of(
+        (context, builder) -> builder.addMessage(Message.builder().withContent(
+            format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
+              ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems()))).build())
+          .build(),
+        "look around"
+      ),
+      OneOfStringAction.of(
+        (context, builder) -> {
+          context.getCurrentLocation().moveAllItemsTo(context.getContainersAvailable().stream().findAny().orElseThrow());
+          return builder.build();
+        },
+        "take all"
+      ),
+      OneOfStringAction.of(
+        (context, builder) -> {
+          context.getContainersAvailable().stream().findAny().orElseThrow().moveAllItemsTo(context.getCurrentLocation());
+          return builder.build();
+        },
+        "drop all"
+      )
+
+    );
+
+    private GameContext globalActionHandler(String action, Location location, ItemContainer inventory) {
       GameContext context = GameContext.builder()
         .withAction(action)
         .withCurrentLocation(location)
-        .withContainer(container)
+        .withContainer(inventory)
         .build();
       ActionContextBuilder contextBuilder = GameContext.builderFromContext(context);
 
@@ -76,21 +107,26 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
         contextBuilder.addMessage(Message.builder().withContent(
           format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
             ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems()))).build());
-
         } else if (context.actionIsOneOf("take all")) {
-          moveAllItems(location, getInventory());
+          location.moveAllItemsTo(getInventory());
         } else if (context.actionIsOneOf("drop all")) {
-          moveAllItems(getInventory(), location);
+          getInventory().moveAllItemsTo(location);
         } else if (context.actionStartsWith("take")) {
-            String queryItem = trim(context.getAction().replaceAll("take", ""));
-            moveItemFrom(location, getInventory(), queryItem, "%s is not in the %s");
+            Item queryItem = queryItem("take", context.getAction());
+            if(!location.moveItemTo(queryItem, getInventory())){
+              contextBuilder.addMessage(Message.builder()
+                .withContent(format("%s is not in the %s", queryItem.getDisplayName(), context.getCurrentLocation().getDisplayName())).build());
+            }
         } else if (context.actionStartsWith("drop")) {
-            String queryItem = trim(context.getAction().replaceAll("drop ", ""));
-            moveItemFrom(getInventory(), location, queryItem, "%s is not in your %s");
+            Item queryItem = queryItem("drop", context.getAction());
+            if(!getInventory().moveItemTo(queryItem, location)){
+              contextBuilder.addMessage(Message.builder()
+              .withContent(format("%s is not in your %s", queryItem.getDisplayName(), getInventory().getDisplayName())).build());
+            }
         } else if (context.actionIsOneOf(getInventory().listInventoryCommands())) {
         contextBuilder.addMessage(Message.builder()
             .withContent(
-              format("your %s %s", getInventory().getDisplayName(), (container.isEmpty())? "has nothing in it": "contains:"+container.listItems())
+              format("your %s %s", inventory.getDisplayName(), (inventory.isEmpty())? "has nothing in it": "contains:"+inventory.listItems())
             )
           .build());
         }
@@ -98,19 +134,11 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
       return contextBuilder.build();
     }
 
-
-  private void moveAllItems(ItemContainer from, ItemContainer to) {
-    itemMover.moveAllItems(from, to);
+  @SuppressWarnings("unchecked")
+  private Item queryItem(final String prefix, final String action) {
+    final String queryItem = trim(action.replaceAll(prefix, ""));
+    Collection<ARTIFACT> items = defaultArtifact.find(queryItem);
+    return (isEmpty(items)) ? create(queryItem) : ((ARTIFACT) get(items, 0)).get();
   }
 
-  private void moveItemFrom(ItemContainer from, ItemContainer to, String queryItem, String failurePattern) {
-        Collection<ARTIFACT> items = defaultArtifact.find(queryItem);
-        @SuppressWarnings("unchecked")
-        Item item = (isEmpty(items)) ? create(queryItem) : ((ARTIFACT) get(items, 0)).get();
-        if (!itemMover.moveItem(item, from, to)){
-            out.println(format(failurePattern,
-                    item.getDisplayName(),
-                    from.getDisplayName()));
-        }
-    }
 }
