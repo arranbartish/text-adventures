@@ -17,6 +17,16 @@ public class OutsideEntrance extends MansionLocation {
     setHouse(house);
   }
 
+  @Override
+  public GameContext getStory(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getStory()).build();
+  }
+
+  @Override
+  public GameContext getQuestion(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getQuestion()).build();
+  }
+
   public String getStory() {
     return "You are in the legend. You see a beautiful village with monsters. There is a " +
       "dark mansion in front of you.";

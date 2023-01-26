@@ -38,11 +38,17 @@ public class GameContext {
     return new ActionContextBuilder();
   }
 
-  public static ActionContextBuilder builderFromContext(GameContext context) {
+  public static ActionContextBuilder builderFromContextWithoutMessages(GameContext context) {
     return builder()
       .withCurrentLocation(context.getCurrentLocation())
       .withNextLocation(context.getNextLocation())
       .withAction(context.getAction())
+      .withContainer(context.getContainersAvailable().stream().findAny().orElse(null));
+
+  }
+
+  public static ActionContextBuilder builderFromContext(GameContext context) {
+    return builderFromContextWithoutMessages(context)
       .withMessages(context.getMessages());
 
   }

@@ -23,6 +23,16 @@ public class Wardrobe extends MansionLocation {
     setHouse(house);
   }
 
+  @Override
+  public GameContext getStory(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getStory()).build();
+  }
+
+  @Override
+  public GameContext getQuestion(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getQuestion()).build();
+  }
+
   public String getStory() {
     return "You find yourself in a wardrobe and the wardrobe has " +
       ((this.isEmpty()) ? "nothing in it" : this.listItems()) +

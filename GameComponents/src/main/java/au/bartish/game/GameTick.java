@@ -39,13 +39,26 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
 
     @Override
     public GameContext tick() {
-        out.println(getCurrentLocation().getStory());
-        out.println(getCurrentLocation().getQuestion());
-        final String response = lowerCase(scanner.nextLine());
+      GameContext gameContext = GameContext.builder()
+        .withCurrentLocation(getCurrentLocation())
+        .withContainer(getInventory())
+        .build();
 
-      GameContext gameContext = globalActionHandler(response, getCurrentLocation(), getInventory());
+      gameContext = gameContext.getCurrentLocation()
+        .getStory(gameContext);
 
-      gameContext = getCurrentLocation().handleAction(gameContext);
+      gameContext = gameContext.getCurrentLocation()
+        .getQuestion(gameContext);
+
+      gameContext
+        .getMessages()
+        .forEach(this::print);
+      final String response = lowerCase(scanner.nextLine());
+
+      gameContext = GameContext.builderFromContextWithoutMessages(gameContext)
+        .withAction(response).build();
+      gameContext = gameContext.getCurrentLocation().handleAction(gameContext);
+      gameContext = globalActionHandler(gameContext);
 
       updateLocation(Optional.ofNullable(gameContext.getNextLocation()).orElse(gameContext.getCurrentLocation()));
 
@@ -90,16 +103,18 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
           return builder.build();
         },
         "drop all"
+      ),
+      OneOfStringAction.of(
+        (context, builder) -> {
+          context.getContainersAvailable().stream().findAny().orElseThrow().moveAllItemsTo(context.getCurrentLocation());
+          return builder.build();
+        },
+        "drop all"
       )
-
     );
 
-    private GameContext globalActionHandler(String action, Location location, ItemContainer inventory) {
-      GameContext context = GameContext.builder()
-        .withAction(action)
-        .withCurrentLocation(location)
-        .withContainer(inventory)
-        .build();
+    private GameContext globalActionHandler(GameContext context) {
+
       ActionContextBuilder contextBuilder = GameContext.builderFromContext(context);
 
 
@@ -108,25 +123,25 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
           format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
             ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems()))).build());
         } else if (context.actionIsOneOf("take all")) {
-          location.moveAllItemsTo(getInventory());
+          context.getCurrentLocation().moveAllItemsTo(getInventory());
         } else if (context.actionIsOneOf("drop all")) {
-          getInventory().moveAllItemsTo(location);
+          getInventory().moveAllItemsTo(context.getCurrentLocation());
         } else if (context.actionStartsWith("take")) {
             Item queryItem = queryItem("take", context.getAction());
-            if(!location.moveItemTo(queryItem, getInventory())){
+            if(!context.getCurrentLocation().moveItemTo(queryItem, getInventory())){
               contextBuilder.addMessage(Message.builder()
                 .withContent(format("%s is not in the %s", queryItem.getDisplayName(), context.getCurrentLocation().getDisplayName())).build());
             }
         } else if (context.actionStartsWith("drop")) {
             Item queryItem = queryItem("drop", context.getAction());
-            if(!getInventory().moveItemTo(queryItem, location)){
+            if(!getInventory().moveItemTo(queryItem, context.getCurrentLocation())){
               contextBuilder.addMessage(Message.builder()
               .withContent(format("%s is not in your %s", queryItem.getDisplayName(), getInventory().getDisplayName())).build());
             }
         } else if (context.actionIsOneOf(getInventory().listInventoryCommands())) {
         contextBuilder.addMessage(Message.builder()
             .withContent(
-              format("your %s %s", inventory.getDisplayName(), (inventory.isEmpty())? "has nothing in it": "contains:"+inventory.listItems())
+              format("your %s %s", context.getContainersAvailable().stream().findAny().orElseThrow().getDisplayName(), (context.getContainersAvailable().stream().findAny().orElseThrow().isEmpty())? "has nothing in it": "contains:"+ context.getContainersAvailable().stream().findAny().orElseThrow().listItems())
             )
           .build());
         }

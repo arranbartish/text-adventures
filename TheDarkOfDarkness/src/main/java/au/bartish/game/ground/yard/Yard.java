@@ -21,6 +21,16 @@ public class Yard extends MansionLocation {
   }
 
   @Override
+  public GameContext getStory(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getStory()).build();
+  }
+
+  @Override
+  public GameContext getQuestion(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getQuestion()).build();
+  }
+
+  @Override
   public String getStory() {
     return "You enter the yard and feel someone watching you.\n\n" +
       "There is a Dark Elf regarding you from the middle of the yard. " +

@@ -6,9 +6,23 @@ import au.bartish.game.model.GameContext;
 
 public class Exit extends BaseItemContainer implements Location {
 
-    public String getStory() {
+  @Override
+  public GameContext getStory(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getStory()).build();
+  }
+
+  @Override
+  public GameContext getQuestion(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getQuestion()).build();
+  }
+
+  @Override
+
+  public String getStory() {
         return getDisplayName();
     }
+
+  @Override
 
     public String getQuestion() {
         return "Press any key";

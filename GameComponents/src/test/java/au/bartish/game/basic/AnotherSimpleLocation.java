@@ -16,7 +16,23 @@ public class AnotherSimpleLocation extends BaseItemContainer implements Location
         this.put(OVEN.get());
     }
 
-    @Override
+  @Override
+  public GameContext getStory(GameContext gameContext) {
+    return GameContext
+      .builderFromContext(gameContext)
+      .addMessage(getStory())
+      .build();
+  }
+
+  @Override
+  public GameContext getQuestion(GameContext gameContext) {
+    return GameContext
+      .builderFromContext(gameContext)
+      .addMessage(getQuestion())
+      .build();
+  }
+
+  @Override
     public String getStory() {
         return "Another Story";
     }

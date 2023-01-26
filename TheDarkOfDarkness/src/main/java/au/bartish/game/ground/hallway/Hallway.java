@@ -8,6 +8,7 @@ import au.bartish.game.model.Message;
 
 public class Hallway extends MansionLocation {
 
+
   public Hallway() {
     super("hallway");
   }
@@ -15,6 +16,16 @@ public class Hallway extends MansionLocation {
   public Hallway(House house) {
     this();
     setHouse(house);
+  }
+
+  @Override
+  public GameContext getStory(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getStory()).build();
+  }
+
+  @Override
+  public GameContext getQuestion(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getQuestion()).build();
   }
 
   public String getStory() {

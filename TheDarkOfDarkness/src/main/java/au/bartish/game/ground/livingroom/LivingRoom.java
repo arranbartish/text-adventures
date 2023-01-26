@@ -22,6 +22,16 @@ public class LivingRoom extends MansionLocation {
     setHouse(house);
   }
 
+  @Override
+  public GameContext getStory(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getStory()).build();
+  }
+
+  @Override
+  public GameContext getQuestion(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getQuestion()).build();
+  }
+
   public String getStory() {
     return "You're in the living room and it has " +
       ((this.isEmpty()) ? "nothing in it" : this.listItems()) +

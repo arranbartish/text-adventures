@@ -35,6 +35,16 @@ public class Kitchen extends MansionLocation {
   }
 
   @Override
+  public GameContext getStory(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getStory()).build();
+  }
+
+  @Override
+  public GameContext getQuestion(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getQuestion()).build();
+  }
+
+  @Override
   public GameContext handleAction(GameContext gameContext) {
     ActionContextBuilder actionContextBuilder = GameContext.builderFromContext(gameContext);
 

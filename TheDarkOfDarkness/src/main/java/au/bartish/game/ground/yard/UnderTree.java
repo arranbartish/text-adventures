@@ -21,6 +21,16 @@ public class UnderTree extends MansionLocation {
   }
 
   @Override
+  public GameContext getStory(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getStory()).build();
+  }
+
+  @Override
+  public GameContext getQuestion(GameContext gameContext) {
+    return GameContext.builderFromContext(gameContext).addMessage(getQuestion()).build();
+  }
+
+  @Override
   public String getStory() {
     return getPrefix() + "The elf continues to mutter himself about a troll." +
       "\nHe shows an interest in you and waits for you to speak." +
