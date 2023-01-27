@@ -1,10 +1,7 @@
 package au.bartish.game;
 
-import au.bartish.game.model.ConditionalAction;
-import au.bartish.game.model.GameContext;
+import au.bartish.game.model.*;
 import au.bartish.game.model.GameContext.ActionContextBuilder;
-import au.bartish.game.model.Message;
-import au.bartish.game.model.OneOfStringAction;
 import au.bartish.game.utilities.TextProvider;
 
 import java.io.PrintStream;
@@ -83,70 +80,68 @@ public abstract class GameTick<ARTIFACT extends GameArtifact<ARTIFACT>> implemen
 
   private final Collection<ConditionalAction> globalActions =
     List.of(
-      OneOfStringAction.of(
+      ActionOne.of(
         (context, builder) -> builder.addMessage(
             format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
               ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems())))
           .build(),
         "look around"
       ),
-      OneOfStringAction.of(
+      ActionOne.of(
         (context, builder) -> {
           context.getCurrentLocation().moveAllItemsTo(context.getContainersAvailable().stream().findAny().orElseThrow());
           return builder.build();
         },
         "take all"
       ),
-      OneOfStringAction.of(
+      ActionOne.of(
         (context, builder) -> {
           context.getContainersAvailable().stream().findAny().orElseThrow().moveAllItemsTo(context.getCurrentLocation());
           return builder.build();
         },
         "drop all"
       ),
-      OneOfStringAction.of(
+      ActionStarts.with(
         (context, builder) -> {
-          context.getContainersAvailable().stream().findAny().orElseThrow().moveAllItemsTo(context.getCurrentLocation());
+          Item queryItem = queryItem("take", context.getAction());
+          if(!context.getCurrentLocation().moveItemTo(queryItem, getInventory())){
+            builder.addMessage(Message.builder()
+              .withContent(format("%s is not in the %s", queryItem.getDisplayName(), context.getCurrentLocation().getDisplayName())).build());
+          }
           return builder.build();
         },
-        "drop all"
+        "take"
+      ),
+      ActionStarts.with(
+        (context, builder) -> {
+          Item queryItem = queryItem("drop", context.getAction());
+          if(!getInventory().moveItemTo(queryItem, context.getCurrentLocation())){
+            builder.addMessage(Message.builder()
+              .withContent(format("%s is not in your %s", queryItem.getDisplayName(), getInventory().getDisplayName())).build());
+          }
+          return builder.build();
+        },
+        "drop"
+      ),
+      ActionOnContext.with(
+        (context, builder) -> {
+          builder.addMessage(Message.builder()
+            .withContent(
+              format("your %s %s", context.getContainersAvailable().stream().findAny().orElseThrow().getDisplayName(), (context.getContainersAvailable().stream().findAny().orElseThrow().isEmpty()) ? "has nothing in it" : "contains:" + context.getContainersAvailable().stream().findAny().orElseThrow().listItems())
+            )
+            .build());
+          return builder.build();
+        },
+        context -> context.actionIsOneOf(getInventory().listInventoryCommands())
       )
     );
 
     private GameContext globalActionHandler(GameContext context) {
-
-      ActionContextBuilder contextBuilder = GameContext.builderFromContext(context);
-
-
-      if (context.actionIsOneOf("look around")){
-        contextBuilder.addMessage(Message.builder().withContent(
-          format("your in a %s and it %s", getCurrentLocation().getDisplayName(),
-            ((getCurrentLocation().isEmpty())? "has nothing in it": "contains:"+getCurrentLocation().listItems()))).build());
-        } else if (context.actionIsOneOf("take all")) {
-          context.getCurrentLocation().moveAllItemsTo(getInventory());
-        } else if (context.actionIsOneOf("drop all")) {
-          getInventory().moveAllItemsTo(context.getCurrentLocation());
-        } else if (context.actionStartsWith("take")) {
-            Item queryItem = queryItem("take", context.getAction());
-            if(!context.getCurrentLocation().moveItemTo(queryItem, getInventory())){
-              contextBuilder.addMessage(Message.builder()
-                .withContent(format("%s is not in the %s", queryItem.getDisplayName(), context.getCurrentLocation().getDisplayName())).build());
-            }
-        } else if (context.actionStartsWith("drop")) {
-            Item queryItem = queryItem("drop", context.getAction());
-            if(!getInventory().moveItemTo(queryItem, context.getCurrentLocation())){
-              contextBuilder.addMessage(Message.builder()
-              .withContent(format("%s is not in your %s", queryItem.getDisplayName(), getInventory().getDisplayName())).build());
-            }
-        } else if (context.actionIsOneOf(getInventory().listInventoryCommands())) {
-        contextBuilder.addMessage(Message.builder()
-            .withContent(
-              format("your %s %s", context.getContainersAvailable().stream().findAny().orElseThrow().getDisplayName(), (context.getContainersAvailable().stream().findAny().orElseThrow().isEmpty())? "has nothing in it": "contains:"+ context.getContainersAvailable().stream().findAny().orElseThrow().listItems())
-            )
-          .build());
-        }
-
-      return contextBuilder.build();
+      return globalActions.stream()
+        .filter(action -> action.isMet(context))
+        .findFirst()
+          .map(action -> action.apply(context))
+            .orElse(context);
     }
 
   @SuppressWarnings("unchecked")
