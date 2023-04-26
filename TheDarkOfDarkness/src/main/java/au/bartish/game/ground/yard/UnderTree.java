@@ -52,11 +52,16 @@ public class UnderTree extends MansionLocation {
   public GameContext handleAction(GameContext gameContext) {
     ActionContextBuilder actionContextBuilder = GameContext.builderFromContext(gameContext);
 
-    if (gameContext.actionIsOneOf("stop","leave","bye")
-    ) {
+    if (gameContext.actionIsOneOf("stop","leave","bye")) {
       actionContextBuilder.withNextLocation(getHouse().get("yard"));
     } else if (gameContext.actionIsOneOf("monster", "monsters","village")) {
       actionContextBuilder.addMessage(villageStory())
+        .withNextLocation(this);
+    } else if (gameContext.actionIsOneOf("troll")) {
+      actionContextBuilder.addMessage(trollStory())
+        .withNextLocation(this);
+    } else if (gameContext.actionIsOneOf("house")) {
+      actionContextBuilder.addMessage(trollHouse())
         .withNextLocation(this);
     } else {
       actionContextBuilder
@@ -68,6 +73,17 @@ public class UnderTree extends MansionLocation {
       .build();
   }
 
+  private Message trollHouse() {
+    return Message.builder()
+
+      .build();
+  }
+
+  private Message trollStory() {
+
+    return Message.builder().build();
+  }
+
   private String getPrefix() {
     String result = prefix;
     prefix = "";
@@ -77,7 +93,7 @@ public class UnderTree extends MansionLocation {
   private String villageStory() {
     return
       """
-      On a beautiful da, the sorcerer who owns this mansion
+      On a beautiful day, the sorcerer who owns this mansion
       wonted to grow his power with an army of monstrous
       minions, but the spell went wrong and his monsters went
       wild and took the village and his life.

@@ -17,6 +17,7 @@
 
   <modules>
     <module>GameComponents</module>
+    <module>new-game</module>
     <module>TheDarkOfDarkness</module>
 <!--    <module>TheDarkDuck</module>-->
   </modules>

@@ -5,6 +5,7 @@ import au.bartish.game.ground.enterence.OutsideEntrance;
 import au.bartish.game.ground.hallway.Hallway;
 import au.bartish.game.ground.kitchen.Kitchen;
 import au.bartish.game.ground.livingroom.LivingRoom;
+import au.bartish.game.ground.yard.OutsideShed;
 import au.bartish.game.ground.yard.UnderTree;
 import au.bartish.game.ground.yard.Yard;
 
@@ -29,6 +30,7 @@ public class House {
       new LivingRoom(),
       new Kitchen(),
       new Yard(),
+      new OutsideShed(),
       new UnderTree()));
     }
 

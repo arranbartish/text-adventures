@@ -38,9 +38,9 @@ public class Yard extends MansionLocation {
       "The yard has \n" +
       ((this.isEmpty()) ? "nothing in it" : this.listItems()) +
       "\n\nFrom the yard you can: " +
-      "\n - Enter shed" +
+      "\n - Go to shed" +
       "\n - Return to house"+
-      "\n - see the elf";
+      "\n - See the elf";
   }
 
   @Override
@@ -55,8 +55,8 @@ public class Yard extends MansionLocation {
       actionContextBuilder.withNextLocation(getHouse().get("livingRoom"));
     } else if (gameContext.actionIsOneOf("elf") ) {
       actionContextBuilder.withNextLocation(getHouse().get("tree"));
-    } else if (gameContext.actionIsOneOf("shed", "enter")) {
-      actionContextBuilder.withNextLocation(this);
+    } else if (gameContext.actionIsOneOf("shed", "go")) {
+      actionContextBuilder.withNextLocation(getHouse().get("outsideShed"));
     } else {
       actionContextBuilder.withNextLocation(this);
     }
