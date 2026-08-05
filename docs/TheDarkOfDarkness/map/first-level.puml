@@ -1,5 +1,5 @@
 @startuml
-title TheDarkOfDarkness - 1st Level (Planned)
+title TheDarkOfDarkness - First Floor (Planned)
 
 skinparam shadowing false
 skinparam packageStyle rectangle
@@ -15,8 +15,8 @@ rectangle "Bullet Mold\noutput: silver bullets\nrequirements: melted silver + 'B
 rectangle "Bathroom\nNPC: Vampire\nitems: mirror shards\ndefeat: stake with Wooden sword\ndrop: Wand handle (wand half #1)" as bathroom
 rectangle "Ballroom\nNPC: Troll\ndefeat: sunlight via final mirror shard\nitems: display gun, silver cutlery\ndrop: Wand tip (wand half #2)" as ballroom
 rectangle "Stair to Tower\nitems: TBD" as towerStairs
-rectangle "Death: Vampire\nThe vampire drains you dry in seconds.\nThe End.\nRestart available." as vampireDeath
-rectangle "Death: Troll\nThe troll tears you apart before the sunlight trap is set.\nThe End.\nRestart available." as trollDeath
+rectangle "Death: Vampire\nThe vampire drains you dry in seconds.\nWith your last thought: 'If only I had something made of wood...'\nThe End.\nRestart available." as vampireDeath
+rectangle "Death: Troll\nThe troll tears you apart before the sunlight trap is set.\nAs the world goes black: 'If only it were not so dark in here...'\nThe End.\nRestart available." as trollDeath
 
 landing --> library : west
 landing --> study : north

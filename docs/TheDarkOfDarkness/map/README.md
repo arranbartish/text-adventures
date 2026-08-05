@@ -14,8 +14,8 @@ This directory contains text-based level maps for **TheDarkOfDarkness** using Pl
 - The current code implements ground-level locations: outside entrance, hallway, kitchen, living room, and yard.
 - The map now includes a planned **Toy Chest** reachable from the living room (`toy chest` / `chest`) and return via (`leave` / `exit`).
 - The map now includes a planned **Apple Tree** area from the yard (`tree` / `elf` / `dark elf`) with return via (`leave` / `exit`), where the player can talk to the Dark Elf.
-- The map now includes planned **Shed Entrance** transitions: from yard via (`shed`) and back via (`leave` / `exit`).
-- Transition from Shed Entrance down to the dungeon is planned as key-gated and requires **Dark Mysterious obscure Key**.
+- The map now includes planned **Shed Entrance** transitions: entering from the yard via (`shed`) is key-gated and requires the **Dark Mysterious obscure Key**, with return via (`leave` / `exit`).
+- Once the shed is unlocked, the descent down into the dungeon is free (no further key required).
 - Shed flow now includes an **ominous dark stairway** into the dungeon.
 - Dungeon progression now includes:
   - passing cells filled with the wizard victims' fractured, meat-picked bones
@@ -36,8 +36,8 @@ This directory contains text-based level maps for **TheDarkOfDarkness** using Pl
 - Entering the **Tower chamber** without a Loaded Gun is a planned death condition; `leave` / `exit` returns to tower stairwell.
 - Entering the **Ballroom** without mirror-shard prerequisites (final shard + shard #1 and #2 placements) is a planned death condition.
 - Facing the **Bathroom Vampire** without the Wooden sword is a planned death condition.
-- All death terminals are narrative endings with **"The End"** and immediate restart availability.
-- First level and tower are included as map scaffolding for expansion.
+- All death terminals are narrative endings with **"The End"** and immediate restart availability, each including a wistful dying hint at the missing item (wood for the Vampire, silver bullets for the Werewolf, sunlight/darkness for the Troll).
+- First floor and tower are included as map scaffolding for expansion.
 
 ## Render
 

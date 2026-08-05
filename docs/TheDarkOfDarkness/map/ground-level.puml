@@ -13,7 +13,7 @@ rectangle "Toy Chest\nstatus: planned\nitems: Rubber duck, Beach ball, Wooden sw
 rectangle "Yard\nitems: Apple, Skipping rope, Rabbit food (ground)" as yard
 rectangle "Apple Tree\nstatus: planned\nNPC: Dark Elf\ninteraction: talk to Dark Elf\nDark Elf fears Troll + unleashed monsters\ncrafting: repairs wand parts -> Dark Cursed wand" as appleTree
 rectangle "Shed Entrance\nentry: uses Dark Mysterious obscure Key\nfeature: ominous dark stairway to dungeon" as shed
-rectangle "Dungeon Access\n(level transition)\nrequires: Dark Mysterious obscure Key" as dungeonAccess
+rectangle "Dungeon Access\n(level transition)\nreached via the shed's ominous dark stairway" as dungeonAccess
 rectangle "First Floor Landing\n(level transition)" as firstFloorLanding
 
 outside --> hallway : yes

@@ -46,7 +46,7 @@ The Dark Elf served the wizard and has failed to close the summoning portal or r
 ** place mirror shard #1 in sunlight in the Study
 ** place mirror shard #2 in reflected light at the Landing
 ** use the final shard in the Ballroom to bathe the Troll in sunlight, turning it to stone
-* Fail condition: entering the Ballroom without the final shard and both placement steps completed gets the player torn apart by the Troll (_The End_; restart available)
+* Fail condition: entering the Ballroom without the final shard and both placement steps completed gets the player torn apart by the Troll (_The End_; restart available). Dying hint: _"If only it were not so dark in here..."_
 * Drop: Wand tip (second half of the wand)
 
 === Vampire (First Floor)
@@ -55,7 +55,7 @@ The Dark Elf served the wizard and has failed to close the summoning portal or r
 * Location: Bathroom
 * Story detail: shattered mirrors because it could not see its reflection
 * Defeat condition: stake it through the heart with the Wooden sword
-* Fail condition: facing the vampire without the Wooden sword gets the player drained dry (_The End_; restart available)
+* Fail condition: facing the vampire without the Wooden sword gets the player drained dry (_The End_; restart available). Dying hint: _"If only I had something made of wood..."_
 * Drop: Wand handle (first half of the wand)
 
 === Werewolf (Tower)
@@ -63,7 +63,7 @@ The Dark Elf served the wizard and has failed to close the summoning portal or r
 * Type: NPC/monster threat
 * Location: Tower chamber
 * Defeat condition: must use the Loaded Gun
-* Fail condition: entering the Tower chamber without the Loaded Gun gets the player mauled by the Werewolf (_The End_; restart available)
+* Fail condition: entering the Tower chamber without the Loaded Gun gets the player mauled by the Werewolf (_The End_; restart available). Dying hint: _"If only I had silver bullets..."_
 * Drop: Dark Mysterious obscure Key (used for shed/dungeon access)
 
 == Location Story Notes
@@ -148,6 +148,3 @@ crumbly-wumbly vex-hex... uh... *mrrrph*.”_
 . Recite the restored incantation (including an improvised mumbled final word) to close the summoning portal and win the chapter.
 . Epilogue hook: the closing portal drags the player to a demonic castle lined with stone gargoyles; one seems to move.
 
-== Open Story Threads
-
-* What awaits inside the demonic castle in the next game?
