@@ -15,6 +15,7 @@ public class Yard extends BaseItemContainer implements Location {
     this.house = house;
     this.put(APPLE.get());
     this.put(SKIPPING_ROPE.get());
+    this.put(RABBIT_FOOD.get());
   }
 
   @Override
@@ -38,6 +39,10 @@ public class Yard extends BaseItemContainer implements Location {
   public Location doAction(String action) {
     if (action.equalsIgnoreCase("return") || action.equalsIgnoreCase("house") ) {
       return house.get("livingRoom");
+    } else if (action.equalsIgnoreCase("tree") || action.equalsIgnoreCase("elf") || action.equalsIgnoreCase("dark elf")) {
+      return house.get("appleTree");
+    } else if (action.equalsIgnoreCase("shed")) {
+      return house.get("shed");
     }
     return this;
   }

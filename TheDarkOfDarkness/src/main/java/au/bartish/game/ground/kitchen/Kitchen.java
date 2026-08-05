@@ -13,7 +13,6 @@ public class Kitchen extends BaseItemContainer implements Location {
     public Kitchen(House house) {
         this.house = house;
         this.put(POT.get());
-        this.put(RABBIT_FOOD.get());
         this.put(KNIFE.get());
         this.put(OVEN.get());
     }

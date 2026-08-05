@@ -5,19 +5,21 @@ This directory contains text-based level maps for **TheDarkOfDarkness** using Pl
 ## Levels
 
 - `ground-level.puml` (implemented locations and links from code)
-- `first-level.puml` (planned)
-- `tower-level.puml` (planned)
-- `dungeon-under-shed.puml` (planned)
+- `first-level.puml` (implemented locations and links from code)
+- `tower-level.puml` (implemented locations and links from code)
+- `dungeon-under-shed.puml` (implemented locations and links from code)
 
 ## Notes
 
-- The current code implements ground-level locations: outside entrance, hallway, kitchen, living room, and yard.
-- The map now includes a planned **Toy Chest** reachable from the living room (`toy chest` / `chest`) and return via (`leave` / `exit`).
-- The map now includes a planned **Apple Tree** area from the yard (`tree` / `elf` / `dark elf`) with return via (`leave` / `exit`), where the player can talk to the Dark Elf.
-- The map now includes planned **Shed Entrance** transitions: entering from the yard via (`shed`) is key-gated and requires the **Dark Mysterious obscure Key**, with return via (`leave` / `exit`).
-- Once the shed is unlocked, the descent down into the dungeon is free (no further key required).
-- Shed flow now includes an **ominous dark stairway** into the dungeon.
-- Dungeon progression now includes:
+- All locations described across the four maps are now wired into the game with plain, unconditional transitions (no item/key gating, no NPC encounters yet).
+- The shed is reachable from the yard without needing the Dark Mysterious obscure Key; the dungeon stairway down is likewise free.
+- The Toy Chest (Rubber duck, Beach ball, Wooden sword) is reachable from the Living Room (`toy chest` / `chest`), returning via `leave` / `exit`.
+- The Apple Tree is reachable from the yard (`tree` / `elf` / `dark elf`) with no Dark Elf interaction wired yet; return via `leave` / `exit`.
+- The dungeon under the shed is fully linked: Shed -> (`down`) Stairway -> (`descend`) Cells (Bones) -> (`pass`) Summoning Chamber (Tattered grimoire) -> (`restore`) Restored Incantation -> (`recite`) Victory/cliffhanger scene.
+- The first floor is reachable from the Hallway (`up`) via the new Landing, connecting to Library/Bookshelf, Study (Sunlight Stream, Forge, Bullet Mold sub-rooms), Bathroom (Mirror shard), and Ballroom (Display gun, Silver cutlery).
+- The Tower (Stairwell, Chamber, Balcony) is reachable from the Landing (`up`).
+- NPCs (Dark Elf, Rabbit, Vegetable Spirit, Vampire, Troll, Werewolf) and any item/condition-gated transitions (keys, crafting, combat) are **not yet implemented** — this pass only wires up locations, plain transitions, and non-NPC-drop items.
+
   - passing cells filled with the wizard victims' fractured, meat-picked bones
   - reaching a summoning chamber with the mauled wizard corpse and tattered grimoire
   - restoring the incantation using the **Dark Cursed wand** + kitchen paper scrap

@@ -18,7 +18,19 @@ public enum Artifact implements GameArtifact<Artifact> {
     OVEN(create("Oven"), "oven", "all"),
     INVISIBLE_CLOAK(create("Invisible cloak"), "invisible cloak", "invisible", "cloak", "all"),
     SKIPPING_ROPE(create("Skipping Rope"), "rope", "all"),
-    APPLE(create("Apple"), "apple", "all")
+    APPLE(create("Apple"), "apple", "all"),
+    WOODEN_SWORD(create("Wooden sword"), "wooden sword", "wooden", "all"),
+    MIRROR_SHARD(create("Mirror shard"), "mirror shard", "mirror", "shard", "all"),
+    DISPLAY_GUN(create("Display gun"), "display gun", "gun", "all"),
+    SILVER_CUTLERY(create("Silver cutlery"), "silver cutlery", "cutlery", "silver", "all"),
+    BONES(create("Bones"), "bones", "all"),
+    TATTERED_GRIMOIRE(create("Tattered grimoire"), "tattered grimoire", "grimoire", "all"),
+    BULLET_MAKING_FOR_DUMMIES(create("Bullet Making for Dummies"), "bullet making for dummies", "all"),
+    FIFTY_SHADES_OF_PREY(create("Fifty Shades of Prey"), "fifty shades of prey", "all"),
+    INTERPRETIVE_DANCE_BOOK(create("How to Win Fights with Interpretive Dance"), "how to win fights with interpretive dance", "all"),
+    NECROMANCY_BOOK(create("Necromancy for People Who Hate Mornings"), "necromancy for people who hate mornings", "all"),
+    HAUNTED_CUTLERY_BOOK(create("101 Uses for Haunted Cutlery"), "101 uses for haunted cutlery", "all"),
+    OVERTHINKING_TRAPS_BOOK(create("The Complete Guide to Overthinking Traps"), "the complete guide to overthinking traps", "all")
   ;
 
     private final Searchable<Artifact> searchable;

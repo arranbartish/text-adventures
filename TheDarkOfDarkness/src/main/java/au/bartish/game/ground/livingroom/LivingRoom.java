@@ -4,23 +4,19 @@ import au.bartish.game.BaseItemContainer;
 import au.bartish.game.House;
 import au.bartish.game.Location;
 
-import static au.bartish.game.Artifact.BEACH_BALL;
-import static au.bartish.game.Artifact.RUBBER_DUCK;
-
 public class LivingRoom extends BaseItemContainer implements Location {
 
     private final House house;
 
     public LivingRoom(House house) {
         this.house = house;
-        this.put(RUBBER_DUCK.get());
-        this.put(BEACH_BALL.get());
     }
 
     public String getStory() {
         return "You're in the living room and it has " +
                 ((this.isEmpty()) ? "nothing in it" : this.listItems()) +
                 "\n\nIt has two windows and: " +
+                "\n - a toy chest" +
                 "\n - an exit to the backyard" +
                 "\n - a door to the west";
     }
@@ -34,6 +30,8 @@ public class LivingRoom extends BaseItemContainer implements Location {
       return house.get("hallway");
     } else if (action.equalsIgnoreCase("exit")) {
       return house.get("yard");
+    } else if (action.equalsIgnoreCase("toy chest") || action.equalsIgnoreCase("chest")) {
+      return house.get("toyChest");
     }
     return this;
   }

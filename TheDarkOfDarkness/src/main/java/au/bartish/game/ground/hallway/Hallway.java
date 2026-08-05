@@ -19,7 +19,9 @@ public class Hallway extends BaseItemContainer implements Location {
                 "You find yourself in a hallway with 3 closed doors in front of you. There in a door in:" +
                 "\n- The west" +
                 "\n- The north" +
-                "\n- The east";
+                "\n- The east" +
+                "\n\nA staircase leads up to the first floor." +
+                "\n\nThe front door back to the entrance is behind you.";
     }
 
     public String getQuestion() {
@@ -33,6 +35,15 @@ public class Hallway extends BaseItemContainer implements Location {
             return house.get("kitchen");
         } else if (action.equalsIgnoreCase("east")) {
             return house.get("livingRoom");
+        } else if (action.equalsIgnoreCase("up")) {
+            return house.get("landing");
+        } else if (action.equalsIgnoreCase("leave") || action.equalsIgnoreCase("exit") || action.equalsIgnoreCase("outside")) {
+            house.getOut().println("You wrench open the front door and step back outside.\n" +
+                    "The monsters that missed their meal earlier don't miss twice.\n" +
+                    "As you're dragged into the dark, your last thought is:\n" +
+                    "\"Well... I wish I stayed in the house.\"\n\n" +
+                    "The End.");
+            System.exit(0);
         }
 
         house.getOut().println("You stand there thinking about which direction to go.");
