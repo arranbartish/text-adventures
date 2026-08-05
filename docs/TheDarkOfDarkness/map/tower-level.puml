@@ -1,0 +1,26 @@
+@startuml
+title TheDarkOfDarkness - Tower Level (Planned)
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+top to bottom direction
+
+rectangle "Tower Stairwell\nitems: TBD" as stairwell
+rectangle "Tower Chamber\nNPC: Werewolf\ndefeat requirement: Loaded Gun\ndrop: Dark Mysterious obscure Key" as chamber
+rectangle "Tower Balcony\nitems: TBD" as balcony
+rectangle "Loaded Gun\ncrafted action: gun + silver bullets\nusable anywhere once crafted" as loadedGun
+rectangle "Death: Werewolf\nThe werewolf pounces before you can react.\nThe End.\nRestart available." as death
+
+stairwell --> chamber : up
+chamber --> balcony : out
+balcony --> chamber : back / return
+chamber --> stairwell : leave / exit
+loadedGun --> chamber : use to defeat werewolf
+chamber --> death : enter without Loaded Gun
+
+note bottom of chamber
+This level is requested for mapping but is not
+implemented in TheDarkOfDarkness code yet.
+end note
+
+@enduml

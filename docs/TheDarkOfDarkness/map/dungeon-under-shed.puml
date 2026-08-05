@@ -1,0 +1,31 @@
+@startuml
+title TheDarkOfDarkness - Dungeon Under the Shed (Planned)
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+left to right direction
+
+rectangle "Shed Hatch\nentry condition: player has Dark Mysterious obscure Key" as hatch
+rectangle "Ominous Stairway\nfrom shed into dungeon depth" as stairway
+rectangle "Dungeon Cells\ncontents: fractured meat-picked bones of wizard's victims" as cells
+rectangle "Summoning Chamber\nscene: mauled wizard corpse resting on a slab\nitem: tattered destroyed grimoire in wizard's hands\nfeature: summoning portal" as chamber
+rectangle "Restored Incantation\naction: use Dark Cursed wand + paper scrap + grimoire\nnote: final word unclear, player mumbles it" as incantation
+rectangle "Victory / Cliffhanger\nportal closes, then drags player through\nnew scene: demonic castle with stone gargoyles\n'...did that one just move?'" as victory
+
+hatch --> stairway : down
+stairway --> cells : descend
+cells --> chamber : pass through cells
+chamber --> incantation : restore readable spell
+incantation --> victory : recite incantation
+
+note bottom of chamber
+Dungeon access is gated from Shed Entrance and
+requires "Dark Mysterious obscure Key".
+Grimoire restoration needs Dark Cursed wand +
+paper scrap from Vegetable Spirit.
+Reciting the restored incantation closes this chapter,
+but the ending launches the player into a new threat.
+This flow is planned and not wired in code yet.
+end note
+
+@enduml

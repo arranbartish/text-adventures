@@ -1,0 +1,36 @@
+@startuml
+title TheDarkOfDarkness - Ground Level (Current + Planned)
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+left to right direction
+
+rectangle "Outside Entrance\n(front yard of mansion)\nitems: none" as outside
+rectangle "Hallway\nitems: none\nup: First Floor Landing" as hallway
+rectangle "Kitchen\nitems: Pot, Knife, Oven\nNPCs: Rabbit, Vegetable Spirit (after feeding rabbit)" as kitchen
+rectangle "Living Room\nitems: none\ncontains: Toy Chest (planned)" as living
+rectangle "Toy Chest\nstatus: planned\nitems: Rubber duck, Beach ball, Wooden sword" as toyChest
+rectangle "Yard\nitems: Apple, Skipping rope, Rabbit food (ground)" as yard
+rectangle "Apple Tree\nstatus: planned\nNPC: Dark Elf\ninteraction: talk to Dark Elf\nDark Elf fears Troll + unleashed monsters\ncrafting: repairs wand parts -> Dark Cursed wand" as appleTree
+rectangle "Shed Entrance\nentry: uses Dark Mysterious obscure Key\nfeature: ominous dark stairway to dungeon" as shed
+rectangle "Dungeon Access\n(level transition)\nrequires: Dark Mysterious obscure Key" as dungeonAccess
+rectangle "First Floor Landing\n(level transition)" as firstFloorLanding
+
+outside --> hallway : yes
+hallway --> kitchen : west
+kitchen --> hallway : east
+hallway --> firstFloorLanding : up
+hallway --> living : east
+living --> hallway : west
+living ..> toyChest : toy chest / chest
+toyChest ..> living : leave / exit
+living --> yard : exit
+yard --> living : return/house
+yard ..> appleTree : tree / elf / dark elf
+appleTree ..> yard : leave / exit
+yard --> shed : shed (use key)
+shed --> yard : leave / exit
+shed --> dungeonAccess : ominous dark stairway
+dungeonAccess --> shed : back / up
+
+@enduml

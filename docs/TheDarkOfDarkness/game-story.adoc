@@ -1,0 +1,153 @@
+= TheDarkOfDarkness Story Tracker
+:toc:
+:toclevels: 2
+
+== Story Premise
+
+You enter a dark mansion while monsters roam outside. The adventure unfolds across the mansion grounds, upper levels, tower, and the dungeon under the shed.
+
+== Backstory
+
+The mansion's wizard was old and reckless, experimenting with forbidden dark magic. His spell spiraled out of control, summoning monsters that killed him, escaped the dungeon, and attacked the village.
+
+The Dark Elf served the wizard and has failed to close the summoning portal or reverse the curse alone.
+
+== Characters
+
+=== Dark Elf (Apple Tree in Yard)
+
+* Type: NPC (guide and quest-giver)
+* Physical location: under the Apple Tree (which is inside the yard)
+* Motivation: terrified of the monsters now roaming free, and specifically fearful of the Troll on the first floor
+* Role in progression:
+** helps the player understand the objective and sequence
+** can repair the broken wand if the player brings all wand parts
+** repaired output: _Dark Cursed wand_
+
+=== Vegetable Spirit (Kitchen)
+
+* Type: NPC (likely a cabbage spirit)
+* Current story note: his mother was eaten by the wizard
+* Visibility rule: appears only after the rabbit has been fed
+* Narrative role: holds a missing scrap of paper needed to restore the spellbook
+
+=== Rabbit (Kitchen)
+
+* Type: NPC
+* Gameplay role: gatekeeper for revealing the Vegetable Spirit
+* Requirement: must be fed Rabbit food
+
+=== Troll (First Floor)
+
+* Type: NPC/monster threat
+* Location: Ballroom
+* Story impact: a major source of fear for the Dark Elf
+* Defeat condition:
+** place mirror shard #1 in sunlight in the Study
+** place mirror shard #2 in reflected light at the Landing
+** use the final shard in the Ballroom to bathe the Troll in sunlight, turning it to stone
+* Fail condition: entering the Ballroom without the final shard and both placement steps completed gets the player torn apart by the Troll (_The End_; restart available)
+* Drop: Wand tip (second half of the wand)
+
+=== Vampire (First Floor)
+
+* Type: NPC/monster threat
+* Location: Bathroom
+* Story detail: shattered mirrors because it could not see its reflection
+* Defeat condition: stake it through the heart with the Wooden sword
+* Fail condition: facing the vampire without the Wooden sword gets the player drained dry (_The End_; restart available)
+* Drop: Wand handle (first half of the wand)
+
+=== Werewolf (Tower)
+
+* Type: NPC/monster threat
+* Location: Tower chamber
+* Defeat condition: must use the Loaded Gun
+* Fail condition: entering the Tower chamber without the Loaded Gun gets the player mauled by the Werewolf (_The End_; restart available)
+* Drop: Dark Mysterious obscure Key (used for shed/dungeon access)
+
+== Location Story Notes
+
+=== Kitchen
+
+* Contains the Rabbit NPC.
+* The Vegetable Spirit is only visible here after feeding the rabbit.
+* The spirit holds the spellbook paper scrap.
+
+=== Yard
+
+* The Apple Tree is in the yard.
+* The Dark Elf is specifically under the Apple Tree (not generally in the yard).
+* Rabbit food is found on the ground in the yard.
+
+=== Living Room
+
+* Planned Toy Chest branch with childlike artifacts.
+
+=== First Floor
+
+* Bathroom: Vampire encounter and mirror shards.
+* Library: contains a bookshelf location with a key crafting reference book.
+* Study: mirror shard sunlight setup step, plus a small forge and bullet mold crafting station.
+* Landing: mirror shard reflected-light setup step.
+* Ballroom: Troll encounter; contains a display gun and silver cutlery.
+* Crafting gate: bullet mold requires both melted silver from the forge and _Bullet Making for Dummies_ from the bookshelf.
+* Global action: if player has both gun and silver bullets, they can combine them anywhere into a Loaded Gun.
+
+=== Tower
+
+* Contains the Werewolf encounter.
+* Werewolf can only be defeated using the Loaded Gun.
+* Tower chamber supports return command `leave` / `exit` back to the stairwell.
+* Werewolf defeat drops the Dark Mysterious obscure Key.
+
+=== Library Bookshelf (Funny Titles)
+
+* _Bullet Making for Dummies_
+* _Fifty Shades of Prey_
+* _How to Win Fights with Interpretive Dance_
+* _Necromancy for People Who Hate Mornings_
+* _101 Uses for Haunted Cutlery_
+* _The Complete Guide to Overthinking Traps_
+
+=== Dungeon Under Shed
+
+* Entry requires the Dark Mysterious obscure Key to open the shed.
+* From the shed, an ominous dark stairway descends into the dungeon.
+* The cells contain only fractured, meat-picked bones of the wizard's victims.
+* Beyond the cells lies the summoning chamber.
+* In the chamber, the mauled wizard corpse rests serenely on a slab with the tattered destroyed grimoire in his hands.
+* The Dark Cursed wand is used to merge the kitchen paper scrap with the grimoire so the incantation becomes readable.
+* Reciting the incantation closes the portal and wins the chapter.
+* Immediately after victory, the player is sucked into the collapsing portal and reappears before a demonic castle ornamented with stone gargoyles. One appears to move.
+
+=== Restored Incantation (As Recited)
+
+_“By spoon and splatter, by moonlight and batter,  
+shut this rude rift in the realm of the natter,  
+crumbly-wumbly vex-hex... uh... *mrrrph*.”_
+
+* The player mumbles the ending and assumes it is probably fine.
+* The portal closes, but the magic recoil still drags the player through into the next adventure.
+
+== Main Quest Flow
+
+. Speak to the Dark Elf under the Apple Tree to learn how to break the curse.
+. Use the Wooden sword to defeat the Bathroom Vampire and obtain the wand handle (first wand half).
+. Solve the mirror-shard sunlight setup (Study -> Landing) and defeat the Ballroom Troll.
+. Collect the Troll drop (wand tip, second wand half).
+. Take silver cutlery from the Ballroom, melt it in the Study forge, then use the bullet mold (with melted silver and _Bullet Making for Dummies_) to create silver bullets.
+. Combine gun + silver bullets anywhere to create a Loaded Gun.
+. Defeat the Tower Werewolf using the Loaded Gun and take the Dark Mysterious obscure Key.
+. Feed the rabbit using Rabbit food found in the yard.
+. Meet the now-visible Vegetable Spirit and obtain the missing paper scrap.
+. Bring wand parts to the Dark Elf to repair them into the _Dark Cursed wand_.
+. Use the Dark Mysterious obscure Key to enter the shed.
+. Descend the ominous dark stairway into the dungeon and pass through the bone-filled cells.
+. In the summoning chamber, use the _Dark Cursed wand_ to combine the kitchen paper scrap with the tattered grimoire.
+. Recite the restored incantation (including an improvised mumbled final word) to close the summoning portal and win the chapter.
+. Epilogue hook: the closing portal drags the player to a demonic castle lined with stone gargoyles; one seems to move.
+
+== Open Story Threads
+
+* What awaits inside the demonic castle in the next game?

@@ -1,0 +1,50 @@
+@startuml
+title TheDarkOfDarkness - 1st Level (Planned)
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+left to right direction
+
+rectangle "First Floor Landing\nitems: mirror shard #2 placement zone\npurpose: reflected light step" as landing
+rectangle "Library\ncontains: Bookshelf location" as library
+rectangle "Bookshelf\nbooks include:\n- Bullet Making for Dummies\n- Fifty Shades of Prey\n- How to Win Fights with Interpretive Dance\n- Necromancy for People Who Hate Mornings\n- 101 Uses for Haunted Cutlery\n- The Complete Guide to Overthinking Traps" as bookshelf
+rectangle "Study\ncontains: Sunlight Stream, Small Forge, Bullet Mold" as study
+rectangle "Sunlight Stream\nuse: place mirror shard #1" as sunlight
+rectangle "Small Forge\ninput: silver cutlery\noutput: melted silver" as forge
+rectangle "Bullet Mold\noutput: silver bullets\nrequirements: melted silver + 'Bullet Making for Dummies'" as mold
+rectangle "Bathroom\nNPC: Vampire\nitems: mirror shards\ndefeat: stake with Wooden sword\ndrop: Wand handle (wand half #1)" as bathroom
+rectangle "Ballroom\nNPC: Troll\ndefeat: sunlight via final mirror shard\nitems: display gun, silver cutlery\ndrop: Wand tip (wand half #2)" as ballroom
+rectangle "Stair to Tower\nitems: TBD" as towerStairs
+rectangle "Death: Vampire\nThe vampire drains you dry in seconds.\nThe End.\nRestart available." as vampireDeath
+rectangle "Death: Troll\nThe troll tears you apart before the sunlight trap is set.\nThe End.\nRestart available." as trollDeath
+
+landing --> library : west
+landing --> study : north
+landing --> bathroom : bathroom (bring Wooden sword)
+landing --> ballroom : ballroom (requires final shard + shard #1 and #2 placements)
+landing --> towerStairs : up
+library --> bookshelf : inspect shelf
+bookshelf --> library : back
+library --> landing : exit / leave
+study --> sunlight : use sunlight stream
+sunlight --> study : back
+study --> forge : use forge
+forge --> study : back
+study --> mold : use bullet mold
+mold --> study : back
+ballroom --> forge : carry silver cutlery
+forge --> mold : provide melted silver
+bookshelf --> mold : provide bullet-making guide
+study --> landing : reflected light path
+bathroom --> landing : exit
+ballroom --> landing : exit
+mold --> ballroom : craft silver bullets for gun
+landing --> trollDeath : ballroom without shard setup
+bathroom --> vampireDeath : face vampire without Wooden sword
+
+note bottom of landing
+This level is requested for mapping but is not
+implemented in TheDarkOfDarkness code yet.
+end note
+
+@enduml
