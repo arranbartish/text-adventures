@@ -26,22 +26,45 @@ import au.bartish.game.ground.yard.Yard;
 import au.bartish.game.tower.TowerBalcony;
 import au.bartish.game.tower.TowerChamber;
 import au.bartish.game.tower.TowerStairwell;
+import au.bartish.game.chat.ChatClient;
+import au.bartish.game.chat.ChatConfiguration;
+import au.bartish.game.chat.SilentChatClient;
+import au.bartish.game.config.DotEnv;
+import au.bartish.game.npc.ConversationRunner;
 
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public class House {
 
     private Map<String, Location> locations = new HashMap<String, Location>();
     private final PrintStream out;
+    private final ItemContainer inventory;
+    private final ConversationRunner conversationRunner;
 
     public House() {
         this(System.out);
     }
 
     public House(PrintStream out) {
+        this(out, new Scanner(System.in), new SilentChatClient(), ChatConfiguration.fromDotEnv(DotEnv.load()),
+                new Backpack());
+    }
+
+    /**
+     * Full constructor used by {@code TheDarkOfDarkness.main} so conversational
+     * NPCs share the real chat client, configuration, input scanner and the
+     * player's actual inventory. The simpler constructors above fall back to a
+     * {@link SilentChatClient} so existing tests and callers keep working
+     * unchanged.
+     */
+    public House(PrintStream out, Scanner scanner, ChatClient chatClient, ChatConfiguration configuration,
+                 ItemContainer inventory) {
         this.out = out;
+        this.inventory = inventory;
+        this.conversationRunner = new ConversationRunner(chatClient, configuration, scanner, out);
         locations.put("hallway", new Hallway(this));
         locations.put("wardrobe", new Wardrobe(this));
         locations.put("outsideEntrance", new OutsideEntrance(this));
@@ -79,6 +102,14 @@ public class House {
 
     public PrintStream getOut() {
         return out;
+    }
+
+    public ItemContainer getInventory() {
+        return inventory;
+    }
+
+    public ConversationRunner getConversationRunner() {
+        return conversationRunner;
     }
 }
 

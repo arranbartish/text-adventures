@@ -1,5 +1,11 @@
 package au.bartish.game;
 
+import au.bartish.game.chat.ChatClient;
+import au.bartish.game.chat.ChatConfiguration;
+import au.bartish.game.chat.OpenAiChatClient;
+import au.bartish.game.chat.SilentChatClient;
+import au.bartish.game.config.DotEnv;
+
 import java.io.PrintStream;
 import java.util.Scanner;
 
@@ -17,7 +23,9 @@ public class TheDarkOfDarkness extends GameTick<Artifact> implements Game {
         super(DEFAULT, scanner, out);
         this.scanner = scanner;
         this.out = out;
-        house = new House(this.out);
+        ChatConfiguration configuration = ChatConfiguration.fromDotEnv(DotEnv.load());
+        ChatClient chatClient = configuration.hasApiKey() ? new OpenAiChatClient(configuration) : new SilentChatClient();
+        house = new House(this.out, this.scanner, chatClient, configuration, this.backpack);
         currentLocation = house.get("outsideEntrance");
     }
 

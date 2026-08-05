@@ -1,0 +1,523 @@
+= Conversational NPCs (LLM) - Design Plan
+:toc:
+:toclevels: 3
+
+== Purpose
+
+Give the game's talking NPCs live, LLM-driven conversations instead of static
+description strings. The player opts in with `talk to <npc>`, holds a free-text
+conversation, and types `leave` to end it and return to normal game play.
+
+The Dark Elf is the first NPC delivered, but the mechanism is generic: adding a
+second NPC must mean writing one small class and registering it, nothing more.
+
+== Scope
+
+=== In scope (v1)
+
+* A reusable conversation subsystem in `GameComponents`, usable by any location
+  and any game module.
+* Two conversational NPCs in _The Dark of Darkness_: the *Dark Elf* (Apple Tree)
+  and the *Vegetable Spirit* (Kitchen).
+* A generic `talk to <npc>` command resolved against each NPC's name and aliases.
+* Restartable sessions: a conversation can be entered, left, and re-entered any
+  number of times, independently per NPC.
+* An OpenAI-backed chat client behind a narrow interface, shared by all NPCs.
+* Per-NPC system prompts producing second-person text-adventure prose, including
+  appearance, mannerisms and speech.
+* Live game state (inventory + quest flags) injected into every prompt.
+* `.env`-based API key loading, never committed.
+* Graceful degradation when the key is missing or the API errors.
+* Cost guardrails (max tokens per reply, max turns per session).
+
+=== Out of scope (v1)
+
+* Conversations *cannot* change game state. They are flavour only. An NPC may
+  *talk* about repairing the wand or handing over a paper scrap, but the actual
+  repair, item transfers and quest progression remain normal game commands
+  handled by `GameTick` / `Location.doAction`.
+* No tool-calling / structured output.
+* No streaming responses.
+* No persistence across game runs - all NPC memory is in-process only.
+* The Rabbit stays non-verbal. It is not implemented in code at all today - only
+  the `RABBIT_FOOD` artifact exists - and building it is separate work.
+
+== Decisions (agreed)
+
+[cols="1,2", options="header"]
+|===
+| Question | Decision
+
+| Can a conversation mutate game state?
+| No. Flavour only for v1.
+
+| Which NPCs are conversational?
+| Dark Elf and Vegetable Spirit. The Rabbit is not.
+
+| How are personas defined?
+| Java classes implementing a common interface, one per NPC. Matches the
+  existing code style; prompts are compile-time constants.
+
+| Entry command
+| Generic `talk to <npc>`, matched against each NPC's name and aliases
+  (e.g. `elf`, `dark elf`; `spirit`, `cabbage`, `vegetable spirit`).
+
+| Exit command
+| `leave` only.
+
+| What does "restartable session" mean?
+| Leaving and re-entering starts a *fresh* session for that NPC, any number of
+  times. Sessions are per-NPC and independent. No cross-run persistence.
+
+| API and model
+| OpenAI Chat Completions API, `gpt-4o-mini`.
+
+| Java version
+| Bump all modules from 1.8 to *Java 21 (LTS)*, use the built-in
+  `java.net.http.HttpClient`. No new HTTP dependency.
+
+| Failure / missing key behaviour
+| Print an in-character "the NPC is unresponsive" message and drop the player
+  back to the current location. Never crash, never leak the stack trace or key.
+
+| Memory across sessions
+| The transcript is discarded on exit. Each NPC retains only a small set of
+  boolean flags - v1 uses *"we have spoken before"* and *"the briefing has been
+  given"* - which are injected into the next session's system prompt.
+
+| Game state in prompt
+| Yes - current inventory contents plus key quest flags.
+
+| Guardrails
+| `max_tokens` cap per reply and a hard cap on turns per session.
+
+| Testing
+| Interface + in-memory fake. Unit tests only. No test touches the network.
+
+| `.env` loading
+| Small hand-rolled reader in `GameComponents`, falling back to real
+  environment variables. No new dependency.
+
+| JSON handling
+| *Gson*, added to `GameComponents`. Escaping player input into the request body
+  is the only real correctness risk here and is not worth hand-rolling.
+
+| Where the test fake lives
+| `ScriptedChatClient` sits in `GameComponents` *main* sources, because separate
+  Maven modules cannot see each other's test classes.
+
+| Vegetable Spirit availability
+| Always available in v1. The Rabbit that was meant to gate him does not exist
+  in code.
+|===
+
+== User Experience
+
+----
+You stand beneath the apple tree with the Dark Elf.
+
+You can:
+ - talk to elf
+ - leave the apple tree
+
+What would you like to do?
+> talk to elf
+
+The Dark Elf unfolds himself from the roots like a shadow peeling off the bark.
+He is thin and grey-skinned, ...
+
+(Type 'leave' to end the conversation.)
+
+Elf> what killed the wizard?
+...
+Elf> leave
+
+The Dark Elf melts back into the shadow of the apple tree.
+
+You stand beneath the apple tree with the Dark Elf.
+What would you like to do?
+> talk to elf
+
+He peers up at you again. "Back so soon."
+...
+----
+
+The second `talk to elf` starts a brand new session. The Elf does not recall the
+earlier questions, but he knows you have met and does not repeat his briefing.
+
+=== Command overloading note
+
+`leave` currently means "go back to the previous location" in several rooms.
+Inside a conversation, `leave` means "end the conversation" and returns the
+player to the *same* location, not the parent room. The two meanings are
+unambiguous because the conversation loop consumes input before the location
+does. The prompt prefix (`Elf>` vs `>`) makes the active context obvious.
+
+== Architecture
+
+=== Design goals
+
+. *One NPC = one small class.* Adding the Vegetable Spirit must not require
+  touching the conversation loop, the chat client, or the command parsing.
+. *Locations are dumb.* A location holds a list of NPCs present and delegates
+  `talk to ...` to a shared resolver.
+. *No game-specific knowledge in `GameComponents`.* The subsystem knows about
+  "an NPC with a persona and memory"; it knows nothing about elves or wands.
+
+=== Module placement
+
+----
+GameComponents/src/main/java/au/bartish/game/
+  chat/
+    ChatClient.java              interface: String reply(List<ChatMessage>)
+    ChatMessage.java             role + content value object
+    ChatRole.java                SYSTEM | USER | ASSISTANT
+    ChatException.java           wrapper for transport failures
+    OpenAiChatClient.java        java.net.http implementation
+    SilentChatClient.java        always fails; used when no key is configured
+    ChatConfiguration.java       model, maxTokens, maxTurns, timeout, apiKey
+  npc/
+    ConversationalCharacter.java interface every talking NPC implements
+    NpcMemory.java               mutable per-NPC flags, survives sessions
+    ConversationSession.java     one run of the turn loop, created per entry
+    ConversationRunner.java      resolves "talk to X", creates + runs sessions
+    GameStateSnapshot.java       inventory + quest flags, read at session start
+    NpcRoster.java               the NPCs present in a location
+
+TheDarkOfDarkness/src/main/java/au/bartish/game/
+  npc/
+    DarkElf.java                 persona prompt + aliases + memory
+    VegetableSpirit.java         persona prompt + aliases + memory
+    DarkOfDarknessQuestFlags.java  derives quest flags from inventory
+  ground/yard/AppleTree.java     holds an NpcRoster containing the Dark Elf
+  ground/kitchen/Kitchen.java    holds an NpcRoster containing the Spirit
+----
+
+=== The NPC interface
+
+[source,java]
+----
+public interface ConversationalCharacter {
+
+    /** Display name, e.g. "Dark Elf". */
+    String getName();
+
+    /** Words the player may use after "talk to", lower case. */
+    String[] getAliases();
+
+    /** True when this NPC is currently present and willing to talk. */
+    boolean isAvailable(GameStateSnapshot state);
+
+    /** Full system prompt for a new session, given live state and memory. */
+    String buildSystemPrompt(GameStateSnapshot state, NpcMemory memory);
+
+    /** Synthetic first user turn so the NPC speaks first. */
+    String getOpeningCue();
+
+    /** Printed when the NPC is present but the LLM is unavailable. */
+    String getUnavailableMessage();
+
+    /** Printed when the player leaves. */
+    String getFarewellMessage();
+
+    /** Persistent flags for this NPC, owned by the NPC instance. */
+    NpcMemory getMemory();
+}
+----
+
+Alias matching reuses the existing `Searchable` / `hasTerm` idea already present
+in `ArrayTermedSearchable`, so the codebase keeps one way of doing term lookup.
+
+`isAvailable` exists so an NPC can be hidden until the world allows it - for
+example a Vegetable Spirit that only manifests once the rabbit has been fed.
+
+NOTE: no shipped NPC uses this in v1, because the Rabbit does not exist in code
+yet. The hook stays on the interface, and `NpcRosterTest` exercises it with a
+fixture, so the gate is a one-line change when the Rabbit is built.
+
+=== Restartable sessions
+
+A `ConversationSession` is created fresh on every `talk to <npc>` and thrown away
+on exit. It owns the message list, the turn counter, and nothing else. There is
+no shared mutable conversation state anywhere.
+
+What *does* survive is `NpcMemory`, owned by the NPC instance:
+
+[source,java]
+----
+public class NpcMemory {
+    private boolean hasSpoken;
+    private boolean hasBeenBriefed;
+    // getters, and markSpoken() / markBriefed() called on session end
+}
+----
+
+Consequences, which the tests assert:
+
+* Entering, leaving and re-entering produces two independent sessions with
+  independent turn counters.
+* A session that ended in an API failure leaves no residue - the next attempt
+  starts clean and may succeed.
+* Two NPCs never share history. Talking to the Elf does not appear in the
+  Spirit's context and vice versa.
+* Hitting the turn cap ends the session but does not prevent a new one.
+
+=== Sequence
+
+. Player types `talk to elf` at the Apple Tree.
+. `AppleTree.doAction` delegates the raw input to `ConversationRunner`.
+. `ConversationRunner` strips the `talk to ` prefix and resolves the remainder
+  against the location's `NpcRoster`, skipping NPCs whose `isAvailable` is false.
+  No match means the location handles the input as normal.
+. The runner builds a `GameStateSnapshot` (inventory listing + quest flags) and
+  asks the NPC for its system prompt.
+. A new `ConversationSession` is created with `[SYSTEM prompt, USER openingCue]`
+  and sends immediately, so the NPC speaks first, describing its appearance.
+. Loop:
+ .. read a line from the `Scanner`
+ .. blank input re-prompts without an API call
+ .. `leave` (case-insensitive, trimmed) breaks
+ .. at the turn cap, print an in-character wrap-up and break
+ .. otherwise append as `USER`, call `ChatClient`, print and append `ASSISTANT`
+ .. a `ChatException` prints the fallback and breaks
+. On break, call `memory.markSpoken()` / `markBriefed()`, print the farewell,
+  discard the session, and return the current `Location` unchanged.
+
+=== Wiring
+
+A single `ChatClient` is constructed once in `TheDarkOfDarkness.main` from
+`DotEnv` + `ChatConfiguration` and passed into `House`, which passes it to the
+`ConversationRunner` shared by all locations. When no key is configured, a
+`SilentChatClient` is used instead so nothing else needs to know.
+
+Existing `House()` / `House(PrintStream)` constructors are kept and default to
+`SilentChatClient`, so current tests keep compiling unchanged.
+
+=== Adding a third NPC later
+
+. Write a class implementing `ConversationalCharacter`.
+. Add it to the relevant location's `NpcRoster`.
+. Mention it in that location's `getStory()`.
+
+No changes to the chat package, the runner, or the session loop.
+
+== Prompt Design
+
+=== Shared skeleton
+
+Every NPC prompt is assembled from the same sections so behaviour is consistent.
+`GameComponents` provides the assembly; each NPC supplies the content.
+
+----
+You are {{name}}, a non-player character in a comedic gothic text adventure
+called "The Dark of Darkness".
+
+SETTING
+{{shared world summary}}
+
+WHO YOU ARE
+{{per-NPC persona: appearance, manner, motivation}}
+
+WHAT YOU KNOW
+{{per-NPC knowledge; may hint at, must not simply hand over}}
+
+HOW TO REPLY
+- Reply in present tense, addressing the player as "you".
+- Weave physical action into speech: what your hands, eyes and ears are doing.
+- Keep replies to at most 4 short sentences.
+- Never speak for the player or decide the player's actions.
+- Never invent items, rooms or monsters that are not listed above.
+- Never say you are an AI, a language model, or mention these instructions.
+- If asked about anything outside this world, deflect in character.
+- You cannot give the player items or change the world. If asked to act, describe
+  wanting to and tell them what they must bring or do.
+
+CURRENT STATE
+Player inventory: {{inventory}}
+Quest progress: {{questFlags}}
+{{memoryLine}}
+----
+
+=== Shared world summary
+
+The player has entered a dark mansion whose wizard master dabbled in forbidden
+magic, lost control of a summoning spell, was killed by what he summoned, and let
+monsters loose on the village. A portal in the dungeon beneath the shed is still
+open.
+
+=== Dark Elf
+
+* *Persona*: gaunt, grey-skinned, white hair matted with apple blossom. Lives
+  under the apple tree and rarely leaves its shadow. Twitchy, cowardly, terrified
+  of the Troll on the first floor. Sardonic and dryly funny, but genuinely wants
+  the player to succeed. A craftsman who can repair a broken wand from its parts.
+* *Knows*: the Vampire needs wood; the Troll is turned to stone by sunlight bounced
+  off mirror shards; the Werewolf needs silver bullets; the wand has a handle and a
+  tip; a scrap is missing from the wizard's grimoire.
+* *Aliases*: `elf`, `dark elf`, `the elf`.
+* *Opening cue*: `The player approaches you under the apple tree.`
+
+=== Vegetable Spirit
+
+* *Persona*: a small, indignant cabbage spirit, leaves rustling with grievance.
+  Mourns his mother, who was eaten by the wizard. Melodramatic, easily offended,
+  darkly comic about being edible.
+* *Knows*: he holds the paper scrap torn from the wizard's grimoire and that the
+  incantation cannot be read without it.
+* *Aliases*: `spirit`, `vegetable spirit`, `cabbage`.
+* *Availability*: always available in v1. The story intends him to appear only
+  after the rabbit is fed, but the Rabbit is not implemented, so there is nothing
+  to gate on. Deferred, not forgotten.
+* *Opening cue*: `The player crouches down to address you among the vegetables.`
+
+=== Placeholders
+
+* `{{inventory}}` - `backpack.listItems()`, or `nothing` when empty.
+* `{{questFlags}}` - a compact list, e.g.
+  `vampire defeated; troll alive; wand handle held; wand tip missing`.
+  v1 derives these from inventory contents via `DarkOfDarknessQuestFlags` so the
+  game model does not need to change.
+* `{{memoryLine}}` - one of:
+ ** first session: `This is the first time you have met this player. Introduce
+    yourself, describe your appearance, and give your briefing.`
+ ** later sessions: `You have met this player before and have already given your
+    briefing. Greet them as a returning acquaintance and do not repeat the full
+    briefing unless asked.`
+
+== Configuration and Secrets
+
+=== `.env`
+
+A `.env` file at the repository root, *never committed*:
+
+----
+OPENAI_API_KEY=sk-...
+# optional overrides
+OPENAI_MODEL=gpt-4o-mini
+NPC_MAX_TURNS=20
+NPC_MAX_TOKENS=200
+----
+
+=== Rules
+
+* `.env` and `.env.*` are in `.gitignore`, with `!.env.example` re-included.
+  *Done already* - verified with `git status`.
+* `.env.example` is committed with placeholder values and no real secret.
+  *Done already.*
+* `DotEnv` resolution order: real environment variable wins, then `.env`, then
+  the built-in default. This keeps CI working with repository secrets.
+* The key is never printed, logged, or included in any error message. Error
+  handling catches the exception and prints only the in-character fallback.
+
+=== Defaults
+
+[cols="1,1,2", options="header"]
+|===
+| Setting | Default | Notes
+| model | `gpt-4o-mini` | override via `OPENAI_MODEL`
+| max tokens per reply | 200 | keeps replies short and cheap
+| max turns per session | 20 | then the NPC politely ends the conversation
+| request timeout | 20s | on timeout, fall back to the unavailable message
+| temperature | 0.8 | characterful but not incoherent
+|===
+
+Limits are per *session*, so a player who leaves and returns gets a fresh
+allowance. This is acceptable: it keeps any single runaway loop bounded, which is
+the actual risk.
+
+== Failure Handling
+
+[cols="1,2", options="header"]
+|===
+| Condition | Behaviour
+
+| No API key configured
+| `SilentChatClient` fails immediately; the NPC's `getUnavailableMessage()` is
+  printed and the player stays put. For the Elf: _"The Dark Elf is curled asleep
+  among the roots. He does not stir."_
+
+| HTTP error, timeout, or malformed response mid-session
+| Print a generic in-character fade-out, end the session, return to the location.
+  Memory flags are still updated only if at least one reply succeeded.
+
+| Empty player input
+| Re-prompt without calling the API.
+
+| Turn cap reached
+| Print an in-character wrap-up and end the session.
+
+| `talk to <unknown>` or NPC not available
+| The location handles the input as it does today - unrecognised input, no crash.
+|===
+
+No failure mode may throw out of `doAction`, print a stack trace, or reveal the
+key. A failed session must leave the NPC re-enterable.
+
+== Build Changes
+
+. Add `maven.compiler.release=21` to the parent `pom.xml` properties and remove
+  the per-module `source`/`target` 1.8 compiler plugin configuration.
+. Confirm `mvn -q clean test` passes on Java 21 before any feature work.
+. No new HTTP dependency - `java.net.http` is built in. *Gson* is added for JSON
+  request building and response parsing, rather than hand-rolling an encoder.
+  Escaping player input is the direction that matters and is not worth
+  hand-rolling.
+
+== Testing Plan
+
+All tests are offline and use a `FakeChatClient` that returns scripted replies
+and records the messages it received.
+
+* `DotEnvTest` - parses `key=value`, ignores blanks and `#` comments, trims
+  quotes, prefers a real environment variable over the file value.
+* `ConversationSessionTest`
+ ** `leave`, `LEAVE` and ` leave ` all end the session
+ ** non-`leave` input is forwarded and the reply printed
+ ** history grows correctly across turns
+ ** the turn cap ends the session
+ ** a `ChatException` ends the session cleanly with the fallback message
+ ** blank input does not call the client
+* `ConversationRestartTest` - the behaviour this revision exists for:
+ ** re-entering after `leave` creates a session with a fresh, empty history
+ ** the turn counter resets on re-entry
+ ** the second session's system prompt contains the returning-visit memory line
+ ** a session ended by a `ChatException` can be re-entered and succeed
+ ** Elf history never appears in a Spirit session, and vice versa
+* `ConversationRunnerTest` - `talk to elf` resolves via alias; `talk to nobody`
+  is not handled; an NPC whose `isAvailable` is false is not resolvable.
+* `NpcPromptTest` - each NPC's prompt contains its persona markers, the current
+  inventory contents, and the correct first vs returning memory line.
+* `AppleTreeTest` / `KitchenTest` - `talk to <npc>` enters a conversation;
+  existing movement commands still behave exactly as before; with no key the
+  unavailable message is printed and the location is unchanged.
+* `OpenAiChatClient` request-building is unit tested against the serialised body,
+  including escaping of quotes and newlines in player input. The transport itself
+  is not tested.
+
+== Implementation Steps
+
+. Bump the build to Java 21 and confirm the existing test suite is green.
+. Implement `DotEnv` + tests.
+. Implement `ChatMessage`, `ChatRole`, `ChatClient`, `ChatException`,
+  `SilentChatClient`, `ChatConfiguration`.
+. Implement `ConversationalCharacter`, `NpcMemory`, `GameStateSnapshot`,
+  `NpcRoster`, `ConversationSession`, `ConversationRunner` + tests with the fake.
+. Implement `OpenAiChatClient` against the Chat Completions endpoint + tests.
+. Implement `DarkElf` and `DarkOfDarknessQuestFlags` + tests.
+. Wire `ChatClient` through `main` -> `House` -> `ConversationRunner` and add the
+  Dark Elf to the Apple Tree; update `AppleTree.getStory()`.
+. Manual play-test the Elf with a real key; verify the asleep path with no key;
+  verify leave/re-enter works repeatedly.
+. Implement `VegetableSpirit` (always available in v1), add it to the Kitchen,
+  update `Kitchen.getStory()`.
+. Update `game-story.adoc` to note which NPCs are conversational.
+
+== Open Items for Later
+
+* Promoting conversations to affect game state (wand repair, handing over the
+  paper scrap) via tool-calling.
+* Persisting NPC memory across game runs.
+* Richer memory than two booleans - e.g. a short model-generated summary carried
+  into the next session.
+* Rate limiting / retry with backoff on 429 responses.
+* A shared global budget across all sessions, if per-session caps prove too loose.

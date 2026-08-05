@@ -1,0 +1,430 @@
+= Conversational NPCs - Implementation Plan
+:toc:
+:toclevels: 3
+
+Derived from link:conversational-npcs-design.adoc[Conversational NPCs (LLM) - Design Plan].
+That document is the source of truth for *what* and *why*; this one covers
+*how* and *in what order*.
+
+== Baseline (verified 2026-08-05)
+
+Recorded before any change so regressions are obvious.
+
+[cols="1,1,1", options="header"]
+|===
+| Module | Tests | Result
+| GameComponents | 40 (2 skipped) | pass
+| The-Dark-Of-Darkness | 30 | pass
+| The-Dark-Duck | 9 | pass
+| *Total* | *79* | `BUILD SUCCESS`
+|===
+
+Environment notes:
+
+* `mvn` is installed via SDKMAN and is *not* on a non-login shell's `PATH`.
+  Source `~/.sdkman/bin/sdkman-init.sh` first, or use the absolute path.
+* Active JDK is Azul Zulu 25. The build currently compiles with `-source 8
+  -target 8` and emits `source value 8 is obsolete` warnings on every module.
+* `maven-compiler-plugin` has no pinned version in any module, which Maven 3.9
+  warns about. Worth fixing in the same pass as the Java bump.
+
+Test stack available today:
+
+* All modules: JUnit 4.13.1 + hamcrest-all 1.3.
+* `GameComponents` only: AssertJ 3.19.0. *`The-Dark-Of-Darkness` does not have
+  AssertJ* - either add it or stick to JUnit/hamcrest in that module.
+
+== Guiding constraints
+
+. *Never break the existing 79 tests.* They are the regression net. Run the full
+  build at the end of every phase.
+. *No test may touch the network.* Enforced by construction: production code only
+  ever talks to a `ChatClient`, and tests only ever inject a fake.
+. *Nothing in `GameComponents` may know about elves, wands or apple trees.*
+. *Every phase ends with a green build*, so work can be stopped or committed at
+  any phase boundary.
+. *Keep existing public constructors working.* `House()` and
+  `House(PrintStream)` must continue to compile and behave, because
+  `AllLocationsTest` and `WardrobeTest` depend on them.
+
+== Phase overview
+
+[cols="1,3,1", options="header"]
+|===
+| Phase | Outcome | Risk
+
+| 0 | Build bumped to Java 21, baseline still green | Low
+| 1 | Secrets plumbing (`DotEnv`) | Low
+| 2 | Chat abstraction + fakes, no HTTP yet | Low
+| 3 | NPC + session subsystem, fully tested offline | Medium
+| 4 | Real OpenAI client | Medium
+| 5 | Dark Elf wired into the Apple Tree | Medium
+| 6 | Manual play-test with a real key | Low
+| 7 | Vegetable Spirit + Kitchen gate | Low
+| 8 | Docs updated | Low
+|===
+
+Phases 0-3 deliver a complete, testable feature with a fake backend. Phase 4 is
+the only phase that introduces network code. That ordering is deliberate: if the
+HTTP work stalls, everything before it is still useful and shippable.
+
+== Phase 0 - Build bump to Java 21
+
+*Goal*: compile and test on Java 21 with no behaviour change.
+
+Changes:
+
+* Parent `pom.xml`: add to `<properties>`
++
+[source,xml]
+----
+<maven.compiler.release>21</maven.compiler.release>
+----
+* Remove the `maven-compiler-plugin` `<configuration>` blocks with
+  `<source>1.8</source><target>1.8</target>` from `GameComponents/pom.xml`,
+  `TheDarkOfDarkness/pom.xml` and `TheDarkDuck/pom.xml`.
+* Pin `maven-compiler-plugin` to a fixed version via `<pluginManagement>` in the
+  parent, clearing the Maven 3.9 warnings.
+* Add `AssertJ 3.19.0` (test scope) to `TheDarkOfDarkness/pom.xml` so the new
+  tests there can use the same assertions as `GameComponents`.
+* Add `Gson` (compile scope) to `GameComponents/pom.xml` for Phase 4.
+
+Acceptance:
+
+* `mvn clean test` is `BUILD SUCCESS` with 79 tests.
+* No `source value 8 is obsolete` warnings remain.
+* No `build.plugins.plugin.version ... is missing` warnings remain.
+
+WARNING: `TheDarkDuck` is unrelated to this feature but shares the parent POM, so
+it is affected by the bump. It must be verified green too, not ignored.
+
+== Phase 1 - Secrets plumbing
+
+*Goal*: read configuration without ever committing a key.
+
+New: `GameComponents/src/main/java/au/bartish/game/config/DotEnv.java`
+
+* `static DotEnv load()` - reads `.env` from the working directory if present.
+* `String get(String key, String fallback)`.
+* Resolution order: `System.getenv(key)` wins, then the `.env` entry, then the
+  fallback. This keeps CI working with repository secrets and lets a developer
+  override the file ad hoc.
+* Parsing rules: ignore blank lines and lines starting with `#`; split on the
+  *first* `=` only; trim whitespace; strip a single matching pair of surrounding
+  single or double quotes.
+* A missing or unreadable `.env` is not an error - it yields an empty map.
+* `toString()` must not include values. There is no getter that dumps all
+  entries.
+
+Tests - `DotEnvTest`:
+
+* parses `key=value`
+* ignores blanks and `#` comments
+* splits on the first `=` only, so `A=b=c` yields `b=c`
+* strips surrounding quotes
+* a real environment variable beats the file value
+* a missing file yields the fallback rather than throwing
+
+Already done in a previous session, no work needed:
+
+* `.gitignore` contains `.env`, `.env.*` and `!.env.example`.
+* `.env.example` is committed with placeholder values.
+
+Acceptance: `git check-ignore .env` matches; `git status` shows `.env.example` as
+a normal file; build green.
+
+== Phase 2 - Chat abstraction
+
+*Goal*: the seam that keeps every later test offline. No HTTP in this phase.
+
+New in `GameComponents/src/main/java/au/bartish/game/chat/`:
+
+* `ChatRole` - enum `SYSTEM`, `USER`, `ASSISTANT`, with the wire name.
+* `ChatMessage` - immutable `role` + `content`, with `equals`/`hashCode` so tests
+  can assert on message lists directly.
+* `ChatException` - extends `Exception`. Checked, so callers cannot forget it.
+  Its message is always safe to print and never contains the API key.
+* `ChatClient` - `String reply(List<ChatMessage> messages) throws ChatException`.
+* `SilentChatClient` - always throws `ChatException`. Used when no key is
+  configured, so the "no key" path is the same code path as the "API broke" path
+  and gets tested for free.
+* `ChatConfiguration` - `model`, `maxTokens`, `maxTurns`, `timeout`,
+  `temperature`, `apiKey`; built from a `DotEnv` with the defaults from the
+  design doc. `apiKey` is only reachable by `OpenAiChatClient`.
+
+* `ScriptedChatClient` - returns canned replies in order and records the messages
+  it was sent.
++
+DECIDED: this lives in *main* sources, not test sources. `GameComponents` and
+`The-Dark-Of-Darkness` are separate Maven modules, so test classes in one are
+invisible to the other and `AppleTreeTest` could not otherwise reach a fake. A
+`test-jar` would work but adds build ceremony for no gain. Keeping it in main is
+also honest: it doubles as a legitimate offline/demo backend.
+
+Tests: `ChatMessageTest` (equality), `SilentChatClientTest` (always throws),
+`ChatConfigurationTest` (defaults applied, overrides honoured, no key leaks
+through `toString`).
+
+Acceptance: build green; nothing yet depends on this code.
+
+== Phase 3 - NPC and session subsystem
+
+*Goal*: the whole feature, working end to end against a fake backend. This is the
+core phase and where the design's restartability requirement is proven.
+
+New in `GameComponents/src/main/java/au/bartish/game/npc/`:
+
+`GameStateSnapshot`::
+Immutable. `inventoryDescription` (from `Inventory.listItems()`, or `nothing`)
+and `questFlags` (a pre-rendered string). Built once per session, at entry, so a
+session sees a consistent world.
+
+`NpcMemory`::
+Mutable, owned by the NPC instance, survives sessions. v1 fields: `hasSpoken`,
+`hasBeenBriefed`, plus `markSpoken()` / `markBriefed()`.
+
+`ConversationalCharacter`::
+The interface from the design doc. No default methods with game logic.
+
+`NpcRoster`::
+Holds the NPCs present in one location. `Optional<ConversationalCharacter>
+resolve(String alias, GameStateSnapshot state)` - matches lower-cased, trimmed
+alias, and skips NPCs whose `isAvailable(state)` is false.
+
+`ConversationSession`::
+Created per entry, discarded on exit. Owns the message list and the turn counter
+and nothing else. Runs the loop described in the design doc.
+
+`ConversationRunner`::
+Owns the shared `ChatClient`, `ChatConfiguration`, `Scanner` and `PrintStream`.
+`boolean handle(String action, NpcRoster roster, GameStateSnapshot state)` -
+returns `false` if the input was not a `talk to ...` for an available NPC, so the
+location falls through to its normal handling.
+
+`PromptBuilder`::
+Assembles the shared prompt skeleton from the per-NPC sections plus state and the
+memory line. Keeps tone rules identical across NPCs.
+
+=== Ordering within the phase
+
+. `GameStateSnapshot`, `NpcMemory` - plain values, trivial tests.
+. `ConversationalCharacter` + a `TestNpc` fixture in test sources.
+. `NpcRoster` + resolution tests.
+. `PromptBuilder` + tests.
+. `ConversationSession` + the full loop tests.
+. `ConversationRunner` + command-parsing tests.
+. `ConversationRestartTest` last, as the integration check over all of it.
+
+=== Tests
+
+`ConversationSessionTest`::
+* `leave`, `LEAVE`, ` leave ` all end the session
+* non-`leave` input is forwarded and the reply printed
+* history grows `SYSTEM, USER(cue), ASSISTANT, USER, ASSISTANT, ...`
+* the turn cap ends the session with an in-character wrap-up
+* a `ChatException` ends the session cleanly with the fallback message
+* blank input re-prompts *without* calling the client (assert call count)
+* the opening cue is sent before the player types anything
+
+`ConversationRestartTest`:: the reason this revision exists
+* re-entering after `leave` starts with an empty history
+* the turn counter resets on re-entry
+* the second session's system prompt contains the returning-visit memory line
+* a session killed by `ChatException` can be re-entered and then succeed
+* NPC A's history never appears in NPC B's session
+* memory flags are set on exit, including on the `leave` path
+
+`ConversationRunnerTest`::
+* `talk to elf` resolves via alias
+* alias matching is case- and whitespace-insensitive
+* `talk to nobody` returns `false` and is left to the location
+* an NPC with `isAvailable == false` does not resolve
+* plain `talk` with no target returns `false`
+
+`NpcRosterTest`, `PromptBuilderTest`, `GameStateSnapshotTest`:: as above.
+
+Acceptance: full feature demonstrable with a scripted fake; build green; still
+nothing game-specific in `GameComponents`.
+
+== Phase 4 - OpenAI client
+
+*Goal*: the only phase with network code.
+
+New: `chat/OpenAiChatClient.java`, using `java.net.http.HttpClient`.
+
+* `POST https://api.openai.com/v1/chat/completions`
+* Headers: `Authorization: Bearer <key>`, `Content-Type: application/json`
+* Body: `model`, `messages`, `max_tokens`, `temperature`
+* Extract `choices[0].message.content`
+* Any non-2xx, timeout, `IOException`, or unparseable body becomes a
+  `ChatException` whose message names the failure class but *never* includes the
+  request body, headers, or key.
+
+Structure it as three separately testable pieces so the untestable part is tiny:
+
+. `OpenAiRequestBuilder` - messages to JSON string, using Gson. Pure, fully unit
+  tested.
+. `OpenAiResponseParser` - JSON string to reply text, using Gson. Pure, fully
+  unit tested.
+. `OpenAiChatClient` - the ~15 lines of transport gluing them together.
+
+DECIDED: use *Gson* rather than a hand-rolled encoder. Escaping player input is
+the direction that matters - a typed `"` or newline must not corrupt the request -
+and it is not worth hand-rolling. Gson is added as a dependency of
+`GameComponents`.
+
+`OpenAiRequestBuilderTest` still covers double quotes, backslashes, newlines,
+tabs, control characters and non-ASCII, because the risk is now "did we route
+input through the encoder at all" rather than "is the encoder correct".
+
+`OpenAiResponseParserTest` must cover: a normal reply, a reply containing escaped
+quotes and newlines, an empty `choices` array, a missing `content` field, and an
+API error envelope - each producing either the right text or a `ChatException`.
+
+Acceptance: build green; no test performs I/O.
+
+== Phase 5 - Dark Elf on the Apple Tree
+
+*Goal*: first playable NPC.
+
+New in `TheDarkOfDarkness/src/main/java/au/bartish/game/npc/`:
+
+* `DarkElf` - persona, knowledge, aliases (`elf`, `dark elf`, `the elf`), opening
+  cue, unavailable and farewell messages, its own `NpcMemory`. `isAvailable`
+  always true.
+* `DarkOfDarknessQuestFlags` - renders the quest-progress string from the
+  `Inventory` contents only, so the game model does not have to change.
+
+Wiring:
+
+* `TheDarkOfDarkness.main` builds `DotEnv` to `ChatConfiguration` to either
+  `OpenAiChatClient` (key present) or `SilentChatClient` (no key), then passes it
+  to `House`.
+* `House` gains a constructor taking a `ChatClient` and builds one shared
+  `ConversationRunner`. The existing `House()` and `House(PrintStream)`
+  constructors delegate with `SilentChatClient`, so current tests are untouched.
+* `AppleTree` gains an `NpcRoster` with the Dark Elf, and `doAction` asks the
+  runner first, falling through to the current `leave`/`exit` handling.
+* `AppleTree.getStory()` advertises `talk to elf`.
+
+CAUTION: `AllLocationsTest` asserts on story text with `containsString` and drives
+the game through scripted stdin. Changing `getStory()` can break it. Re-read that
+test before editing the string, and re-run it immediately after.
+
+DECIDED: `Yard` is left completely untouched. Its story text mentions a Dark Elf
+"regarding you from the middle of the yard", and `Yard.doAction` already accepts
+`elf` / `dark elf` as *navigation* to the apple tree. That reads as a duplicate
+Elf, but changing it risks `AllLocationsTest` for no functional gain. Only the
+Apple Tree is conversational; the Yard keeps its existing navigation meaning of
+`elf`.
+
+Tests `AppleTreeTest`:
+
+* `talk to elf` with a scripted fake enters a conversation and prints the reply
+* `leave` inside the conversation returns the player to the apple tree, *not* the
+  yard
+* `leave` at the apple tree, outside a conversation, still returns the yard
+  (the overloading guard from the design doc)
+* with `SilentChatClient`, the asleep message prints and the location is unchanged
+* unrelated input still behaves as before
+
+Acceptance: `AllLocationsTest` and `WardrobeTest` still pass unmodified; build
+green.
+
+== Phase 6 - Manual play-test
+
+Not automatable, and the first time real prose is seen. Check:
+
+. With a real key: `talk to elf` produces an in-character reply that describes
+  his appearance on the first visit.
+. `leave` exits cleanly and the Apple Tree story reprints.
+. Re-entering greets you as a returning acquaintance and does *not* repeat the
+  full briefing - this is the memory line working.
+. Picking up an item and re-entering: the Elf can refer to it - this is the state
+  injection working.
+. Typing quotes, apostrophes and emoji does not corrupt the request.
+. Removing `OPENAI_API_KEY` gives the asleep message with no stack trace.
+. Setting an *invalid* key gives the fade-out message with no stack trace and no
+  key echoed.
+. Hitting the turn cap ends the session, and the NPC is still re-enterable.
+
+Record anything the model gets wrong about the world; that feeds back into the
+persona text, not into code.
+
+== Phase 7 - Vegetable Spirit
+
+*Goal*: prove the abstraction by adding a second NPC with only a class and a
+registration.
+
+* `VegetableSpirit` - persona, aliases (`spirit`, `vegetable spirit`, `cabbage`),
+  opening cue, messages, own `NpcMemory`.
+* `isAvailable` returns *true* unconditionally in v1 - see below.
+* `Kitchen` gains an `NpcRoster` containing it, and `getStory()` mentions it.
+
+DECIDED: *the Rabbit does not exist in code.* A search of the whole repository
+for "rabbit" finds only the `RABBIT_FOOD` artifact definition and its placement
+in the Yard. `Kitchen` contains no rabbit, no NPC and no feeding command - only
+the teasing line "You have a sense of creature near by".
+
+There is therefore no fed-flag to gate on. Deriving one from inventory contents
+was considered and rejected: `take all` / `drop all` exist and the food can be
+dropped anywhere, so any inventory-derived signal would be wrong in normal play.
+
+For v1 the Spirit is simply always available. The `isAvailable` hook stays on the
+interface so the gate can be added later as a one-line change, once the Rabbit
+gameplay is actually built.
+
+NOTE: this weakens Phase 7 as a test of the abstraction, because the availability
+hook now goes unexercised in production. `NpcRosterTest` must still cover an
+unavailable NPC using a test fixture, so the mechanism is proven even though no
+shipped NPC uses it yet.
+
+Tests `KitchenTest`: `talk to spirit` enters a conversation, `getStory()` mentions
+the spirit, and existing kitchen navigation is unaffected.
+
+Acceptance: no file under `chat/` or `npc/` in `GameComponents` was modified in
+this phase. If any were, the abstraction was wrong and should be revisited.
+
+== Phase 8 - Documentation
+
+* `game-story.adoc`: note that the Dark Elf and Vegetable Spirit are
+  conversational, and that the Rabbit is not.
+* `conversational-npcs-design.adoc`: record any decision that changed during
+  implementation.
+* A short `docs/` note on obtaining a key and creating `.env` from `.env.example`.
+
+== Definition of done
+
+* `mvn clean test` green across all four modules.
+* Test count is at least 79 plus the new tests; no existing test modified except
+  where a deliberate, documented behaviour change required it.
+* No network access from any test.
+* `git status` never shows `.env`.
+* No API key appears in any source file, test, log line or error message.
+* The Dark Elf and Vegetable Spirit are both playable, and both survive
+  leave/re-enter repeatedly.
+* Removing the key degrades the game gracefully rather than breaking it.
+
+== Decisions resolved before coding
+
+All three previously-open questions are now settled, plus one discovered during
+investigation.
+
+[cols="1,2", options="header"]
+|===
+| Question | Resolution
+
+| Where `ScriptedChatClient` lives
+| `GameComponents` *main* sources, so both modules can use it. See Phase 2.
+
+| What signal marks the rabbit as fed
+| Nothing - *the Rabbit does not exist in code*. The Vegetable Spirit is
+  therefore always available in v1 and the gate is added later, once the Rabbit
+  is actually built. See Phase 7.
+
+| Hand-rolled JSON vs a dependency
+| Add *Gson* up front. See Phase 4.
+
+| The Yard's Dark Elf reference
+| Left exactly as-is. Only the Apple Tree is conversational. See Phase 5.
+|===
